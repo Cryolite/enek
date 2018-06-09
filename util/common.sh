@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 ENEK_ROOT_DIR="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/..)"
-THIS_DIR="$(dirname "$(realpath "${BASH_SOURCE[1]}")")"
 PS4='+$(realpath --relative-to="$ENEK_ROOT_DIR" "$(realpath "${BASH_SOURCE[0]}")"):$LINENO: '
 if test -t 1 && tput setaf 1 >&/dev/null; then
     if test "$(tput colors)" == 256; then
