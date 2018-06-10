@@ -10,3 +10,6 @@ before_install:
 
 script:
   - script/test.sh --docker --build-dir=/work/enek-build --concurrency=auto --debug --enable-coverage
+
+after_success:
+  - script/coveralls.py --source-root=. --build-root=/work/enek-build --with-gcov=/usr/local/bin/gcov --clear --service-name=travis-ci '--service-number=$TRAVIS_JOB_NUMBER' '--service-job-id=$TRAVIS_JOB_ID'
