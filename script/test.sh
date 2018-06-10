@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
 . "$SOURCE_DIR/../util/common.sh"
 
 opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l docker,build-dir:,concurrency:,debug,release,enable-coverage,disable-coverage,enable-asan,disable-asan,enable-ubsan,disable-ubsan,enable-tsan,disable-tsan,enable-assert,disable-assert -o j: -- "$@")"
