@@ -11,9 +11,14 @@ RUN set -ex; \
     libbz2-dev \
     make \
     pgp \
+    python3 \
+    python3-dev \
+    python3-pip \
     subversion \
   ; \
-  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists/*; \
+  python3 -m pip install --upgrade pip; \
+  python3 -m pip install requests
 
 # Checkout, build, and install the latest libbacktrace.
 RUN set -ex; \
