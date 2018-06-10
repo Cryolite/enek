@@ -118,7 +118,8 @@ if test "$docker" = yes; then
       ;;
     esac
   done
-  "$ENEK_ROOT_DIR/docker/build/build.sh"
+  #"$ENEK_ROOT_DIR/docker/build/build.sh"
+  docker pull cryolite/enek-build:latest
   docker run --privileged -v "$ENEK_ROOT_DIR":/work/enek -w /work/enek --rm -it cryolite/enek-build:latest /work/enek/script/test.sh "${args_for_docker[@]}"
   exit $?
 fi
