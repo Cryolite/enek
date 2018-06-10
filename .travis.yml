@@ -12,4 +12,4 @@ script:
   - script/test.sh --docker --build-dir=/work/enek-build --concurrency=auto --debug --enable-coverage
 
 after_success:
-  - util/coveralls.py --source-root=. --build-root=/work/enek-build --with-gcov=/usr/local/bin/gcov --clear --service-name=travis-ci '--service-number=$TRAVIS_JOB_NUMBER' '--service-job-id=$TRAVIS_JOB_ID'
+  - docker run --privileged -v .:/work/enek -e TRAVIS_JOB_NUMBER -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST -w /work/enek --rm -it cryolite/enek-build:latest script/cibuild.sh
