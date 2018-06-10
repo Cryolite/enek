@@ -6,7 +6,9 @@ services:
   - docker
 
 before_install:
-- docker pull cryolite/enek-build:latest
+  - sudo apt-get update
+  - sudo apt-get install -y realpath
+  - docker pull cryolite/enek-build:latest
 
 script:
-- docker run --privileged -v "$(pwd)":/work/enek -w /work/enek --rm -it cryolite/enek-build:latest /work/enek/script/ci.sh /work/enek-build
+  - script/test.sh --docker --build-dir=/work/enek-build --concurrency=auto --debug --enable-coverage
