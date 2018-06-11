@@ -12,4 +12,4 @@ script:
   - bin/bootstrap --docker
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker push "$DOCKER_USERNAME/enek-build:latest"
-  - docker run --privileged -v "$(TRAVIS_BUILD_DIR)":/work/enek -e TRAVIS_JOB_NUMBER -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST -w /work/enek --rm -it cryolite/enek-build:latest script/cibuild.sh
+  - docker run --privileged -v "$TRAVIS_BUILD_DIR":/work/enek -e TRAVIS_JOB_NUMBER -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST -w /work/enek --rm -it cryolite/enek-build:latest script/cibuild.sh
