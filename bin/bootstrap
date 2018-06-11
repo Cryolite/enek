@@ -3,14 +3,8 @@
 SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
 . "$SOURCE_DIR/../util/common.sh"
 
-if test $# -gt 0; then
-  opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l docker -o '' -- "$@")"
-else
-  opts=''
-fi
+opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l docker -- '' "$@")"
 eval set -- "$opts"
-
-docker=no
 
 while test "$#" -ne 0; do
   arg="$1"
@@ -22,16 +16,16 @@ while test "$#" -ne 0; do
   '--')
     ;;
   *)
-    print_error_message "error: An invalid argument \`$1'."
+    print_error_message "error: An invalid argument \`$arg'."
     exit 1
     ;;
   esac
 done
 
-if test "$docker" = no; then
+if ! test -v docker; then
   print_error_message "error: Bootstrap procedure is not implemented other than Docker."
   exit 1
 fi
 
 docker pull cryolite/enek-build:latest
-docker/build/build.sh
+docker/build/build.sh --cache-from=cryolite/enek-build:latest
