@@ -79,7 +79,7 @@
                            (interactive)
                            (split-window-horizontally-n 3)))
 
-(setq compile-command "mkdir -p /work/enek-build && cd /work/enek-build && cmake -DCMAKE_BUILD_TYPE=Debug ../enek && make VERBOSE=1 -j \"$(nproc)\"")
+(setq compile-command "/work/enek/bin/test --build-dir=/work/enek-build -j auto --debug")
 (global-set-key [f1] 'compile)
 (global-set-key [f2] 'previous-error)
 (global-set-key [f3] 'next-error)
@@ -142,9 +142,3 @@
        '(("CMakeList\\.txt\\'", cmake-mode)
          ("\\.cmake\\'", cmake-mode))
        auto-mode-alist))
-(add-hook 'cmake-mode-hook
-          '(lambda ()
-             (setq compile-command "mkdir -p /work/enek-build && cd /work/enek-build && cmake -j \"$(nproc)\" -DCMAKE_BUILD_TYPE=Debug ../enek && make VERBOSE=1 -j \"$(nproc)\" && make -j \"$(nproc)\" test ARGS='--output-on-failure --gtest_catch_exceptions=0'")
-             (local-set-key [f1] 'compile)
-             (local-set-key [f2] 'previous-error)
-             (local-set-key [f3] 'next-error)))

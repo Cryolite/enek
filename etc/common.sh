@@ -40,7 +40,6 @@ if test -t 1 && tput setaf 1 &>/dev/null; then
     PS4='$(tput setaf 2)'$PS4'$(tput sgr0)'
   fi
 fi
-set -ex
 
 function print_error_message ()
 {

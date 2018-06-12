@@ -3,6 +3,8 @@
 SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
 . "$SOURCE_DIR/../../etc/common.sh"
 
+set -ex
+
 if type -t timedatectl >/dev/null; then
   timezone="$(timedatectl | grep -F 'Time zone:' | sed -e 's/.*Time zone:[[:space:]]\{1,\}\([^[:space:]]\{1,\}\)[[:space:]]\{1,\}.*/\1/')"
 elif test -f /etc/timezone; then
