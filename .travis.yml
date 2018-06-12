@@ -11,4 +11,4 @@ install:
   - docker push "$DOCKER_USERNAME/enek-build:latest"
 
 script:
-  - docker run --privileged -v "$TRAVIS_BUILD_DIR:/work/enek" -e TRAVIS_JOB_NUMBER -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST -w /work/enek --rm -it cryolite/enek-build:latest "$TRAVIS_BUILD_DIR/bin/cibuild-on-travis"
+  - docker run --privileged -v "$TRAVIS_BUILD_DIR:/work/enek" -e TRAVIS_JOB_NUMBER -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST -w /work/enek --rm -it cryolite/enek-build:latest /work/enek/bin/cibuild-on-travis
