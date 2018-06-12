@@ -1,14 +1,14 @@
 sudo: required
 
-language: cpp
+language: minimal
 
 services:
   - docker
 
 install:
-  - bin/bootstrap
+  - '"$TRAVIS_BUILD_DIR/bin/bootstrap"'
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker push "$DOCKER_USERNAME/enek-build:latest"
 
 script:
-  - docker run --privileged -v "$TRAVIS_BUILD_DIR:/work/enek" -e TRAVIS_JOB_NUMBER -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST -w /work/enek --rm -it cryolite/enek-build:latest /work/enek/bin/cibuild-on-travis
+  - docker run --privileged -v "$TRAVIS_BUILD_DIR:/work/enek" -e TERM -e TRAVIS_JOB_NUMBER -e TRAVIS_JOB_ID -e TRAVIS_PULL_REQUEST -w /work/enek -t --rm cryolite/enek-build:latest /work/enek/bin/cibuild-on-travis
