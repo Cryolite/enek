@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+. "$SOURCE_DIR/../../util/common.sh"
+
+function print_usage ()
+{
+  cat <<'EOF'
+Usage: build [OPTION]...
+Build the Docker image for project build.
+
+  --cache-from=STRINGS       images to consider as cache sources
+  -h, --help                 display this help and exit
+EOF
+}
+
+function on_invalid_argument ()
+{
+  print_error_message "error: An invalid argument \`$1'."
+  print_error_message "Try \`build --help' for more information."
+}
+
+opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l cache-from:,help -- h "$@")"
+eval set -- "$opts"
+
+while test "$#" -ne 0; do
+  arg="$1"
+  shift
+  if test "$expect_further" = yes; then
+    set +x
+    on_invalid_argument "$arg"
+    exit 1
+  fi
+  case "$arg" in
+  '--cache-from')
+    if test $# -eq 0; then
+      set +x
+      print_error_message "error: A logic error."
+      exit 1
+    fi
+    cache_from="$1"
+    shift
+    ;;
+  '-h'|'--help')
+    set +x
+    print_usage
+    exit 0
+    ;;
+  '--')
+    expect_further=yes
+    ;;
+  *)
+    set +x
+    on_invalid_argument "$arg"
+    exit 1
+    ;;
+  esac
+done
+
+docker_build_options=()
+
+if test -v cache_from; then
+  docker_build_options+=("--cache-from=$cache_from")
+fi
+
+docker build "${docker_build_options[@]}" -t cryolite/enek-build "$SOURCE_DIR"
