@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
-. "$SOURCE_DIR/../../util/common.sh"
+. "$SOURCE_DIR/../../etc/common.sh"
 
 function print_usage ()
 {
