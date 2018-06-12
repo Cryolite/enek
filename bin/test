@@ -1,0 +1,291 @@
+#!/usr/bin/env bash
+
+SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+. "$SOURCE_DIR/../util/common.sh"
+
+function print_usage ()
+{
+  cat <<'EOF'
+Usage: test [OPTION]...
+Execute unit tests.
+
+  --docker                   Build and run test code on a Docker container.
+  --build-dir=DIR            Use `DIR' as a build directory.
+  -j, --concurrency=(N|auto) Run `N' tests concurrently, or determine a
+                             suitable value by `auto'.
+  --debug                    Debug build.
+  --release                  Release build.
+  --enable-coverage          Compile and link test code instrumented for
+                             coverage analysis.
+  --disable-coverage         Disable coverage analysis.
+  --enable-asan              Enable AddressSanitizer.
+  --disable-asan             Disable AddressSanitizer.
+  --enable-ubsan             Enable UndefinedBehaviorSanitizer.
+  --disable-ubsan            Disable UndefinedBehaviorSanitizer.
+  --enable-tsan              Enable ThreadSanitizer.
+  --disable-tsan             Disable ThreadSanitizer.
+  --enable-assert            Enable assertions.
+  --disable-assert           Disable assertions.
+  -h, --help                 Display this help and exit.
+EOF
+}
+
+function on_invalid_argument ()
+{
+  print_error_message "error: An invalid argument \`$1'."
+  print_error_message "Try \`test --help' for more information."
+}
+
+opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l docker,build-dir:,concurrency:,debug,release,enable-coverage,disable-coverage,enable-asan,disable-asan,enable-ubsan,disable-ubsan,enable-tsan,disable-tsan,enable-assert,disable-assert,help -- j:h "$@")"
+eval set -- "$opts"
+
+if test -z "$CC"; then
+  export CC=/usr/local/bin/gcc
+fi
+if test -z "$CXX"; then
+  export CXX=/usr/local/bin/g++
+fi
+
+build_type=Debug
+enable_libstdcxx_debug_mode_in_debug=yes
+enable_libstdcxx_debug_mode_in_release=no
+
+while test "$#" -ne 0; do
+  arg="$1"
+  shift
+  if test "$expect_further" = yes; then
+    set +x
+    on_invalid_argument "$arg"
+    exit 1
+  fi
+  case "$arg" in
+  '--docker')
+    docker=yes
+    ;;
+  '--build-dir')
+    if test "$#" -eq 0; then
+      set +x
+      print_error_message "error: A logic error."
+      exit 1
+    fi
+    build_dir="$1"
+    shift
+    ;;
+  '-j'|'--concurrency')
+    if test "$#" -eq 0; then
+      set +x
+      print_error_message "error: A logic error."
+      exit 1
+    fi
+    concurrency="$1"
+    shift
+    ;;
+  '--debug')
+    build_type=Debug
+    ;;
+  '--release')
+    build_type=Release
+    ;;
+  '--enable-coverage')
+    enable_coverage=yes
+    ;;
+  '--disable-coverage')
+    enable_coverage=no
+    ;;
+  '--enable-asan')
+    enable_asan=yes
+    ;;
+  '--disable-asan')
+    enable_asan=no
+    ;;
+  '--enable-ubsan')
+    enable_ubsan=yes
+    ;;
+  '--disable-ubsan')
+    enable_ubsan=no
+    ;;
+  '--enable-tsan')
+    enable_tsan=yes
+    ;;
+  '--disable-tsan')
+    enable_tsan=no
+    ;;
+  '--enable-assert')
+    enable_assert=yes
+    ;;
+  '--disable-assert')
+    enable_assert=no
+    ;;
+  '-h'|'--help')
+    set +x
+    print_usage
+    exit 0
+    ;;
+  '--')
+    expect_further=yes
+    ;;
+  *)
+    set +x
+    on_invalid_argument "$arg"
+    exit 1
+    ;;
+  esac
+done
+
+if test "$docker" = yes; then
+  args_for_test=()
+  eval set -- "$opts"
+  while test "$#" -gt 0; do
+    arg="$1"
+    shift
+    case "$arg" in
+    '--docker')
+      ;;
+    *)
+      args_for_test+=("$arg")
+      ;;
+    esac
+  done
+  docker run --privileged -v "$ENEK_ROOT_DIR":/work/enek -w /work/enek -it --rm cryolite/enek-build:latest /work/enek/bin/test "${args_for_test[@]}"
+  exit $?
+fi
+
+if ! test -v build_dir; then
+  set +x
+  print_error_message "error: \`--build-dir' option is mandatory."
+  print_error_message "Try \`test --help' for more information."
+  exit 1
+fi
+if test -e "$build_dir" -a '!' -d "$build_dir"; then
+  set +x
+  print_error_message "error: Cannot create the directory \`$build_dir' because a file exists."
+  exit 1
+fi
+
+if test -v concurrency; then
+  if test "$concurrency" = auto; then
+    if type -t nproc >/dev/null; then
+      concurrency="$(nproc)"
+    else
+      unset concurrency
+    fi
+  elif echo "$concurrency" | grep -Eq '[1-9][[:digit:]]*'; then
+    :
+  else
+    set +x
+    print_error_message "error: An invalid argument \`$concurrency' for \`--concurrency'."
+    print_error_message "Try \`test --help' for more information."
+    exit 1
+  fi
+fi
+
+cmake_options=()
+
+cmake_options+=('-DCMAKE_C_COMPILER:FILEPATH=/usr/local/bin/gcc')
+
+cmake_options+=('-DCMAKE_CXX_COMPILER:FILEPATH=/usr/local/bin/g++')
+
+cmake_options+=("-DCMAKE_BUILD_TYPE:STRING=$build_type")
+
+if ! test -v enable_coverage; then
+  :
+elif test "$enable_coverage" = yes; then
+  cmake_options+=('-DENEK_ENABLE_COVERAGE:BOOL=ON')
+elif test "$enable_coverage" = no; then
+  cmake_options+=('-DENEK_ENABLE_COVERAGE:BOOL=OFF')
+else
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+if ! test -v enable_asan; then
+  :
+elif test "$enable_asan" = yes; then
+  cmake_options+=('-DENEK_ENABLE_ASAN:BOOL=ON')
+elif test "$enable_asan" = no; then
+  cmake_options+=('-DENEK_ENABLE_ASAN:BOOL=OFF')
+else
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+if ! test -v enable_ubsan; then
+  :
+elif test "$enable_ubsan" = yes; then
+  cmake_options+=('-DENEK_ENABLE_UBSAN:BOOL=ON')
+elif test "$enable_ubsan" = no; then
+  cmake_options+=('-DENEK_ENABLE_UBSAN:BOOL=OFF')
+else
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+if ! test -v enable_tsan; then
+  :
+elif test "$enable_tsan" = yes; then
+  if test "$enable_asan" = yes; then
+    set +x
+    print_error_message "error: AddressSanitizer and ThreadSanitizer cannot be combined."
+    exit 1
+  fi
+  cmake_options+=('-DENEK_ENABLE_TSAN:BOOL=ON')
+elif test "$enable_tsan" = no; then
+  cmake_options+=('-DENEK_ENABLE_TSAN:BOOL=OFF')
+else
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+if test "$build_type" = Debug; then
+  enable_libstdcxx_debug_mode="$enable_libstdcxx_debug_mode_in_debug"
+elif test "$build_type" = Release; then
+  enable_libstdcxx_debug_mode="$enable_libstdcxx_debug_mode_in_release"
+else
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+if test "$enable_libstdcxx_debug_mode" = yes; then
+  cmake_options+=('-DENEK_ENABLE_LIBSTDCXX_DEBUG_MODE:BOOL=ON')
+elif test "$enable_libstdcxx_debug_mode" = no; then
+  cmake_options+=('-DENEK_ENABLE_LIBSTDCXX_DEBUG_MODE:BOOL=OFF')
+else
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+if test -d "$ENEK_ROOT_DIR/.git" || git rev-parse --git-dir 2>/dev/null; then
+  cmake_options+=("-DENEK_GIT_COMMIT_HASH:STRING=$(git rev-parse HEAD)")
+else
+  cmake_options+=('-DENEK_GIT_COMMIT_HASH:STRING=')
+fi
+
+if ! test -v enable_assert; then
+  :
+elif test "$enable_assert" = yes; then
+  cmake_options+=('-DENEK_ENABLE_ASSERT:BOOL=ON')
+elif test "$enable_assert" = no; then
+  cmake_options+=('-DENEK_ENABLE_ASSERT:BOOL=OFF')
+else
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+make_options=()
+
+if test -v concurrency; then
+  make_options+=(-j "$concurrency")
+fi
+
+mkdir -p "$build_dir"
+(cd "$build_dir" && cmake "${cmake_options[@]}" "$ENEK_ROOT_DIR")
+(cd "$build_dir" && make "${make_options[@]}")
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib"
+(cd "$build_dir" && make "${make_options[@]}" test ARGS='--output-on-failure --gtest_catch_exceptions=0')
