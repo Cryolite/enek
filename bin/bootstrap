@@ -3,6 +3,8 @@
 SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
 . "$SOURCE_DIR/../etc/common.sh"
 
+set -ex
+
 function print_usage ()
 {
   cat <<'EOF'
