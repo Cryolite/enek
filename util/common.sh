@@ -45,9 +45,9 @@ function print_error_message ()
 {
     if test -t 2 && tput setaf 1 >&/dev/null; then
         if test "$(tput colors)" == 256; then
-            echo "$(tput setaf 9)$1$(tput sgr0)" >&2
+            echo "$(tput setaf 9)$SOURCE_PATH_RELATIVE: $1$(tput sgr0)" >&2
         else
-            echo "$(tput setaf 1)$1$(tput sgr0)" >&2
+            echo "$(tput setaf 1)$SOURCE_PATH_RELATIVE: $1$(tput sgr0)" >&2
         fi
     else
         echo "$1" >&2
