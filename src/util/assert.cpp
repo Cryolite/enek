@@ -1,5 +1,7 @@
 #include <enek/util/assert.hpp>
 
+#if defined(ENEK_ENABLE_ASSERT)
+
 #include <boost/stacktrace/stacktrace.hpp>
 #include <iostream>
 #include <utility>
@@ -7,7 +9,7 @@
 
 namespace Enek::Detail{
 
-AbortMessanger::AbortMessanger(char const *function_name,
+AbortMessenger::AbortMessenger(char const *function_name,
                                char const *file_name,
                                int line_number,
                                char const *expression,
@@ -22,7 +24,7 @@ AbortMessanger::AbortMessanger(char const *function_name,
     git_commit_hash_(git_commit_hash)
 {}
 
-AbortMessanger::~AbortMessanger()
+AbortMessenger::~AbortMessenger()
 {
   std::cerr << file_name_ << ':' << line_number_ << ": " << function_name_
             << ": " << "Assertion `" << expression_ << "' failed.\n";
@@ -40,3 +42,5 @@ AbortMessanger::~AbortMessanger()
 }
 
 } // namespace Enek::Detail
+
+#endif // defined(ENEK_ENABLE_ASSERT)
