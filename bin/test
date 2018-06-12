@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
-. "$SOURCE_DIR/../util/common.sh"
+. "$SOURCE_DIR/../etc/common.sh"
 
 function print_usage ()
 {
@@ -146,7 +146,10 @@ if test "$docker" = yes; then
       ;;
     esac
   done
-  docker run --privileged -v "$ENEK_ROOT_DIR":/work/enek -w /work/enek -it --rm cryolite/enek-build:latest /work/enek/bin/test "${args_for_test[@]}"
+  if test -t 1; then
+    docker_options=(-t)
+  fi
+  docker run --privileged -v "$ENEK_ROOT_DIR":/work/enek -e TERM -w /work/enek "${docker_options[@]}" --rm cryolite/enek-build:latest /work/enek/bin/test "${args_for_test[@]}"
   exit $?
 fi
 

@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+# This Bash file is not designed to be called directly, but rather is read by
+# `source` Bash builtin command in the very beginning of another Bash script.
 
 function realpath ()
 {
@@ -32,24 +33,24 @@ ENEK_ROOT_DIR="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/..)"
 SOURCE_PATH="$(realpath "${BASH_SOURCE[1]}")"
 SOURCE_PATH_RELATIVE="$(relpath "$SOURCE_PATH" "$ENEK_ROOT_DIR")"
 PS4='+$SOURCE_PATH_RELATIVE:$LINENO: '
-if test -t 1 && tput setaf 1 >&/dev/null; then
-    if test "$(tput colors)" == 256; then
-        PS4='$(tput setaf 10)'$PS4'$(tput sgr0)'
-    else
-        PS4='$(tput setaf 2)'$PS4'$(tput sgr0)'
-    fi
+if test -t 1 && tput setaf 1 &>/dev/null; then
+  if test "$(tput colors)" -eq 256; then
+    PS4='$(tput setaf 10)'$PS4'$(tput sgr0)'
+  else
+    PS4='$(tput setaf 2)'$PS4'$(tput sgr0)'
+  fi
 fi
 set -ex
 
 function print_error_message ()
 {
-    if test -t 2 && tput setaf 1 >&/dev/null; then
-        if test "$(tput colors)" == 256; then
-            echo "$(tput setaf 9)$SOURCE_PATH_RELATIVE: $1$(tput sgr0)" >&2
-        else
-            echo "$(tput setaf 1)$SOURCE_PATH_RELATIVE: $1$(tput sgr0)" >&2
-        fi
+  if test -t 2 && tput setaf 1 &>/dev/null; then
+    if test "$(tput colors)" -eq 256; then
+      echo "$(tput setaf 9)$SOURCE_PATH_RELATIVE: $1$(tput sgr0)" >&2
     else
-        echo "$1" >&2
+      echo "$(tput setaf 1)$SOURCE_PATH_RELATIVE: $1$(tput sgr0)" >&2
     fi
+  else
+    echo "$1" >&2
+  fi
 }
