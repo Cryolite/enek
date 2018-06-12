@@ -10,21 +10,22 @@
 #include <ostream>
 #include <utility>
 
+
 namespace Enek::Detail{
 
-class AbortMessanger
+class AbortMessenger
 {
 public:
-  AbortMessanger(char const *function_name,
+  AbortMessenger(char const *function_name,
                  char const *file_name,
                  int line_number,
                  char const *expression,
                  boost::stacktrace::stacktrace &&st,
                  char const *git_commit_hash);
 
-  AbortMessanger(AbortMessanger const &) = delete;
+  AbortMessenger(AbortMessenger const &) = delete;
 
-  AbortMessanger &operator=(AbortMessanger const &) = delete;
+  AbortMessenger &operator=(AbortMessenger const &) = delete;
 
   template<typename T>
   std::ostream &operator<<(T &&x)
@@ -32,7 +33,7 @@ public:
     return oss_ << std::forward<T>(x);
   }
 
-  ~AbortMessanger();
+  ~AbortMessenger();
 
 private:
   std::ostringstream oss_;
@@ -42,13 +43,13 @@ private:
   char const *expression_;
   boost::stacktrace::stacktrace stacktrace_;
   char const *git_commit_hash_;
-}; // class AbortMessange
+}; // class AbortMessenge
 
 } // namespace Enek::Detail
 
 #define ENEK_ASSERT(EXPR)                                                    \
   (BOOST_LIKELY(!!(EXPR)) ? ((void)0) :                                      \
-   ((void)(::Enek::Detail::AbortMessanger(BOOST_CURRENT_FUNCTION,            \
+   ((void)(::Enek::Detail::AbortMessenger(BOOST_CURRENT_FUNCTION,            \
                                           __FILE__,                          \
                                           __LINE__,                          \
                                           #EXPR,                             \
@@ -57,7 +58,7 @@ private:
 
 #define ENEK_ASSERT_MSG(EXPR, ...)                                             \
   (BOOST_LIKELY(!!(EXPR)) ? ((void)0) :                                        \
-   ((void)(::Enek::Detail::AbortMessanger(BOOST_CURRENT_FUNCTION,              \
+   ((void)(::Enek::Detail::AbortMessenger(BOOST_CURRENT_FUNCTION,              \
                                           __FILE__,                            \
                                           __LINE__,                            \
                                           #EXPR,                               \
@@ -66,29 +67,52 @@ private:
 
 #else // defined(ENEK_ENABLE_ASSERT)
 
+#include <ostream>
+#include <ios>
+
+
 namespace Enek::Detail{
 
-class DummyAbortMessanger{
+class DummyAbortMessenger{
 public:
-  constexpr DummyAbortMessanger() = default;
+  constexpr DummyAbortMessenger() = default;
 
-  DummyAbortMessanger(DummyAbortMessanger const &) = delete;
+  DummyAbortMessenger(DummyAbortMessenger const &) = delete;
 
-  DummyAbortMessanger &operator=(DummyAbortMessanger const &) = delete;
+  DummyAbortMessenger &operator=(DummyAbortMessenger const &) = delete;
 
   template<typename T>
-  constexpr DummyAbortMessanger &operator<<(T &&) const noexcept
+  DummyAbortMessenger const &operator<<(T &&) const noexcept
   {
     return *this;
   }
-}; // class DummyAbortMessanger
+
+  DummyAbortMessenger const &
+  operator<<(std::ostream &(*)(std::ostream &)) const noexcept
+  {
+    return *this;
+  }
+
+  DummyAbortMessenger const &
+  operator<<(std::ios &(*)(std::ios &)) const noexcept
+  {
+    return *this;
+  }
+
+  DummyAbortMessenger const &
+  operator<<(std::ios_base &(*)(std::ios_base &)) const noexcept
+  {
+    return *this;
+  }
+}; // class DummyAbortMessenger
 
 } // namespace Enek::Detail
 
 # define ENEK_ASSERT(EXPR) ((void)0)
 
-# define ENEK_ASSERT_MSG(EXPR, ...)                                \
-  ((true) ? ((void)0) : ((void)DummyAbortMessanger{} __VA_ARGS__))
+# define ENEK_ASSERT_MSG(EXPR, ...)                             \
+  ((true) ? ((void)0) :                                         \
+   ((void)(::Enek::Detail::DummyAbortMessenger{} __VA_ARGS__)))
 
 #endif // defined(ENEK_ENABLE_ASSERT)
 
