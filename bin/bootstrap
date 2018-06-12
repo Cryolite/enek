@@ -3,29 +3,74 @@
 SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
 . "$SOURCE_DIR/../util/common.sh"
 
-opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l docker -- '' "$@")"
+function print_usage ()
+{
+  cat <<'EOF'
+Usage: bootstrap [OPTION]...
+Bootstrap the build environment.
+
+  -p, --platform=PLATFORM    choose the platform; PLATFROM can be `docker'
+                             (the default)
+  -h, --help                 display this help and exit
+EOF
+}
+
+function on_invalid_argument ()
+{
+  print_error_message "error: An invalid argument \`$1'."
+  print_error_message "Try \`bootstrap --help' for more information."
+}
+
+opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l platform:,help -- p:h "$@")"
 eval set -- "$opts"
 
+platform=docker
 while test "$#" -ne 0; do
   arg="$1"
   shift
+  if test "$expect_further" = yes; then
+    set +x
+    on_invalid_argument "$arg"
+    exit 1
+  fi
   case "$arg" in
-  '--docker')
-    docker=yes
+  '-p'|'--platform')
+    if test $# -eq 0; then
+      set +x
+      print_error_message "error: A logic error."
+      exit 1
+    fi
+    platform="$1"
+    shift
+    ;;
+  '-h'|'--help')
+    set +x
+    print_usage
+    exit 0
     ;;
   '--')
+    expect_further=yes
     ;;
   *)
-    print_error_message "error: An invalid argument \`$arg'."
+    set +x
+    on_invalid_argument "$arg"
     exit 1
     ;;
   esac
 done
 
-if ! test -v docker; then
-  print_error_message "error: Bootstrap procedure is not implemented other than Docker."
+if ! test -v platform; then
+  set +x
+  print_error_message "error: A logic error."
+  exit 1
+elif test "$platform" = docker; then
+  :
+else
+  set +x
+  print_error_message "error: An invalid argument \`$platform' for \`--platform'."
+  print_error_message "Try \`bootstrap --help' for more information."
   exit 1
 fi
 
 docker pull cryolite/enek-build:latest
-docker/build/build.sh --cache-from=cryolite/enek-build:latest
+"$ENEK_ROOT_DIR/docker/build/build.sh" --cache-from=cryolite/enek-build:latest
