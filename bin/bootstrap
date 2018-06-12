@@ -73,4 +73,4 @@ else
 fi
 
 docker pull cryolite/enek-build:latest
-"$ENEK_ROOT_DIR/docker/build/build.sh" --cache-from=cryolite/enek-build:latest
+"$ENEK_ROOT_DIR/docker/build/build" --cache-from=cryolite/enek-build:latest
