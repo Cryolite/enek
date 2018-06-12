@@ -5,8 +5,8 @@ SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
 
 set -ex
 
-"$ENEK_ROOT_DIR/bin/test" --build-dir=/work/enek-build/debug -j auto --debug --enable-coverage
-"$ENEK_ROOT_DIR/bin/test" --build-dir=/work/enek-build/release -j auto --release --enable-coverage
+"$ENEK_ROOT_DIR/bin/test" --build-dir=/work/enek-build/enable-assert -j auto --debug --enable-coverage
+"$ENEK_ROOT_DIR/bin/test" --build-dir=/work/enek-build/disable-assert -j auto --debug --enable-coverage --disable-assert
 
 coveralls_options=()
 if test "$TRAVIS_PULL_REQUEST" != false; then
