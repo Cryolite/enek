@@ -293,4 +293,4 @@ mkdir -p "$build_dir"
 (cd "$build_dir" && cmake "${cmake_options[@]}" "$ENEK_ROOT_DIR")
 (cd "$build_dir" && make "${make_options[@]}")
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib"
-(cd "$build_dir" && make "${make_options[@]}" test ARGS='--output-on-failure --gtest_catch_exceptions=0')
+(cd "$build_dir" && "$ENEK_ROOT_DIR/libexec/backtrace-filter" -- make "${make_options[@]}" test "ARGS='--output-on-failure --gtest_catch_exceptions=0'")
