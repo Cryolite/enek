@@ -24,6 +24,30 @@ AbortMessenger::AbortMessenger(char const *function_name,
     git_commit_hash_(git_commit_hash)
 {}
 
+AbortMessenger &AbortMessenger::operator<<(std::ostream &(*pf)(std::ostream &))
+{
+  oss_ << pf;
+  return *this;
+}
+
+AbortMessenger &AbortMessenger::operator<<(std::ios &(*pf)(std::ios &))
+{
+  oss_ << pf;
+  return *this;
+}
+
+AbortMessenger &
+AbortMessenger::operator<<(std::ios_base &(*pf)(std::ios_base &))
+{
+  oss_ << pf;
+  return *this;
+}
+
+AbortMessenger::operator int() const noexcept
+{
+  return 0;
+}
+
 AbortMessenger::~AbortMessenger()
 {
   std::cerr << file_name_ << ':' << line_number_ << ": " << function_name_

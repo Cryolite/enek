@@ -8,6 +8,7 @@
 #include <boost/config.hpp>
 #include <sstream>
 #include <ostream>
+#include <ios>
 #include <utility>
 
 
@@ -28,10 +29,19 @@ public:
   AbortMessenger &operator=(AbortMessenger const &) = delete;
 
   template<typename T>
-  std::ostream &operator<<(T &&x)
+  AbortMessenger &operator<<(T &&x)
   {
-    return oss_ << std::forward<T>(x);
+    oss_ << std::forward<T>(x);
+    return *this;
   }
+
+  AbortMessenger &operator<<(std::ostream &(*pf)(std::ostream &));
+
+  AbortMessenger &operator<<(std::ios &(*pf)(std::ios &));
+
+  AbortMessenger &operator<<(std::ios_base &(*pf)(std::ios_base &));
+
+  operator int() const noexcept;
 
   ~AbortMessenger();
 
@@ -47,23 +57,14 @@ private:
 
 } // namespace Enek::Detail
 
-#define ENEK_ASSERT(EXPR)                                                    \
-  (BOOST_LIKELY(!!(EXPR)) ? ((void)0) :                                      \
-   ((void)(::Enek::Detail::AbortMessenger(BOOST_CURRENT_FUNCTION,            \
-                                          __FILE__,                          \
-                                          __LINE__,                          \
-                                          #EXPR,                             \
-                                          ::boost::stacktrace::stacktrace(), \
-                                          ENEK_GIT_COMMIT_HASH))))
-
-#define ENEK_ASSERT_MSG(EXPR, ...)                                             \
-  (BOOST_LIKELY(!!(EXPR)) ? ((void)0) :                                        \
-   ((void)(::Enek::Detail::AbortMessenger(BOOST_CURRENT_FUNCTION,              \
-                                          __FILE__,                            \
-                                          __LINE__,                            \
-                                          #EXPR,                               \
-                                          ::boost::stacktrace::stacktrace(),   \
-                                          ENEK_GIT_COMMIT_HASH) __VA_ARGS__)))
+#define ENEK_ASSERT(EXPR)                                            \
+  BOOST_LIKELY(!!(EXPR)) ? 0 :                                       \
+   ::Enek::Detail::AbortMessenger(BOOST_CURRENT_FUNCTION,            \
+                                  __FILE__,                          \
+                                  __LINE__,                          \
+                                  #EXPR,                             \
+                                  ::boost::stacktrace::stacktrace(), \
+                                  ENEK_GIT_COMMIT_HASH)
 
 #else // defined(ENEK_ENABLE_ASSERT)
 
@@ -104,15 +105,16 @@ public:
   {
     return *this;
   }
+
+  constexpr operator int() const noexcept
+  {
+    return 0;
+  }
 }; // class DummyAbortMessenger
 
 } // namespace Enek::Detail
 
-# define ENEK_ASSERT(EXPR) ((void)0)
-
-# define ENEK_ASSERT_MSG(EXPR, ...)                             \
-  ((true) ? ((void)0) :                                         \
-   ((void)(::Enek::Detail::DummyAbortMessenger{} __VA_ARGS__)))
+# define ENEK_ASSERT(EXPR) true ? 0 : ::Enek::Detail::DummyAbortMessenger{}
 
 #endif // defined(ENEK_ENABLE_ASSERT)
 
