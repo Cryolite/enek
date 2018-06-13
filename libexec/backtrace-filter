@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+SOURCE_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+. "$SOURCE_DIR/../etc/common.sh"
+
+if test $# -eq 0; then
+  print_error_message "error: Missing program name."
+  print_error_message "Try \`backtrace-filter --help' for more information."
+  exit 1
+fi
+
+function print_usage ()
+{
+  cat <<'EOF'
+Usage: backtrace-filter [OPTION]... -- PROGRAM ARGS...
+Transform backtrace from AddressSanitizer and Boost.Stacktrace into a format
+suitable to Emacs Compilation mode.
+
+  -h, --help                 Display this help and exit.
+EOF
+}
+
+function on_invalid_argument ()
+{
+  print_error_message "error: An invalid argument \`$1'."
+  print_error_message "Try \`backtrace-filter --help' for more information."
+}
+
+opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l help -- fh "$@")"
+eval set -- "$opts"
+
+rest_args=()
+while test $# -ne 0; do
+  arg="$1"
+  shift
+  if test "$expect_rest_args" = yes; then
+    rest_args+=("$arg")
+    continue
+  fi
+  case "$arg" in
+  '-h'|'--help')
+    print_usage
+    exit 0
+    ;;
+  '--')
+    expect_rest_args=yes
+    ;;
+  *)
+    set +x
+    on_invalid_argument "$arg"
+    exit 1
+    ;;
+  esac
+done
+
+if test ${#rest_args[@]} -eq 0; then
+  print_error_message "error: A logic error."
+  exit 1
+fi
+
+function filter ()
+{
+  local asan0_egrep='^ *#[[:digit:]]+ 0x[[:xdigit:]]+ in .* [^ :]+:[[:digit:]]+$'
+  local asan0_sed='s/^\( *#[[:digit:]]* \)\(0x[[:xdigit:]]*\) in \(.*\) \([^ :]*\):\([[:digit:]]*\)$/\1\t\2\t\3\t\4\t\5/'
+  local asan1_egrep='^ *#[[:digit:]]+ 0x[[:xdigit:]]+ in .* \([^)]+\+0x[[:xdigit:]]+\)$'
+  local asan1_sed='s/^\( *#[[:digit:]]* \)\(0x[[:xdigit:]]*\) in \(.*\) (\([^)]*\)+\(0x[[:xdigit:]]*\))$/\1\t\2\t\3\t\4\t\5/'
+  local boost0_egrep='^ *[[:digit:]]+# .* at [^ :]*:[[:digit:]]+$'
+  local boost0_sed='s/^\( *[[:digit:]]*# \)\(.*\) at \([^ :]*\):\([[:digit:]]*\)$/\1\t\2\t\3\t\4/'
+  local boost1_egrep='^ *[[:digit:]]+# 0x[[:xdigit:]]+ in .*$'
+  local boost1_sed='s/^\( *[[:digit:]]*# \)\(0x[[:xdigit:]]*\) in \(.*\)$/\1\t\2\t\3/'
+  (while IFS= read -r line; do
+     if echo "$line" | grep -Eq "$asan0_egrep"; then
+       # Backtrace from AddressSanitier
+       tsv="$(echo "$line" | sed -e "$asan0_sed")"
+       head="$(echo "$tsv" | cut -f 1)"
+       addr="$(echo "$tsv" | cut -f 2)"
+       func="$(echo "$tsv" | cut -f 3)"
+       file="$(echo "$tsv" | cut -f 4)"
+       lineno="$(echo "$tsv" | cut -f 5)"
+       echo "$head$func at $file:$lineno"
+     elif echo "$line" | grep -Eq "$asan1_egrep"; then
+       # Backtrace from AddressSanitizer
+       tsv="$(echo "$line" | sed -e "$asan1_sed")"
+       head="$(echo "$tsv" | cut -f 1)"
+       addr="$(echo "$tsv" | cut -f 2)"
+       func="$(echo "$tsv" | cut -f 3)"
+       file="$(echo "$tsv" | cut -f 4)"
+       addr2="$(echo "$tsv" | cut -f 5)"
+       if test -x "$file"; then
+         addr2line="$(addr2line -e "$file" -f "$addr2" | tr '\n' ':')"
+         func="$(echo "$addr2line" | cut -d ':' -f 1 | c++filt)"
+         file="$(echo "$addr2line" | cut -d ':' -f 2)"
+         lineno="$(echo "$addr2line" | cut -d ':' -f 3)"
+         if test x"$func"x = x??x -o x"$file"x = x??x -o x"$lineno"x = x?x; then
+           echo "$line"
+         else
+           echo "$head$func at $file:$lineno"
+         fi
+       else
+         echo "$line"
+       fi
+     elif echo "$line" | grep -Eq "$boost0_egrep"; then
+       # Backtrace from Boost.Stacktrace
+       tsv="$(echo "$line" | sed -e "$boost0_sed")"
+       head="$(echo "$tsv" | cut -f 1)"
+       func="$(echo "$tsv" | cut -f 2)"
+       file="$(echo "$tsv" | cut -f 3)"
+       lineno="$(echo "$tsv" | cut -f 4)"
+       echo "$head$func at $file:$lineno"
+     elif echo "$line" | grep -Eq "$boost1_egrep"; then
+       # Backtrace from Boost.Stacktrace
+       tsv="$(echo "$line" | sed -e "$boost1_sed")"
+       header="$(echo "$tsv" | cut -f 1)"
+       addr="$(echo "$tsv" | cut -f 2)"
+       file="$(echo "$tsv" | cut -f 3)"
+       if test -x "$file"; then
+         addr2line="$(addr2line -e "$file" -f "$addr" | tr '\n' ':')"
+         func="$(echo "$addr2line" | cut -d ':' -f 1 | c++filt)"
+         file="$(echo "$addr2line" | cut -d ':' -f 2)"
+         lineno="$(echo "$addr2line" | cut -d ':' -f 3)"
+         if test x"$func"x = x??x -o x"$file"x = x??x -o x"$lineno"x = x?x; then
+           echo "$line"
+         else
+           echo "$header$func at $file:$line"
+         fi
+       else
+         echo "$line"
+       fi
+     else
+       echo "$line"
+     fi
+   done)
+}
+
+{
+  {
+    # Redirect stderr to avoid termination message from shell.
+    (exec 3>&2 2>/dev/null
+     eval "${rest_args[@]}" 2>&3 3>&-) | filter
+    exit ${PIPESTATUS[0]}
+  } 3>&1 1>&2 2>&3 3>&- | filter
+  exval=${PIPESTATUS[0]}
+} 3>&1 1>&2 2>&3 3>&-
+exit $exval
