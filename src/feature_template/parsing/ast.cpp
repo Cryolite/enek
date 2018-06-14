@@ -121,10 +121,9 @@ template<typename ASTNode>
 void AST::moveAssign(ASTNode &&root_node)
 {
   static_assert(!std::is_reference<ASTNode>::value);
-  ENEK_ASSERT_MSG(
-    Enek::FeatureTemplate::Parsing::isInitialized(root_node),
+  ENEK_ASSERT(Enek::FeatureTemplate::Parsing::isInitialized(root_node))
     << "info: The type of `root_node' is `" << Enek::getTypeName(root_node)
-    << "'." << std::endl);
+    << "'." << std::endl;
   ENEK_ASSERT(!this->isInitialized());
   root_node_ = std::move(root_node);
 }
