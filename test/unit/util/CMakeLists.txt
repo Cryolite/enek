@@ -1,8 +1,9 @@
 add_executable(test_unit_util
-  assert.cpp)
+  assert.cpp
+  throw.cpp)
 target_link_libraries(test_unit_util
   PRIVATE util
   PRIVATE gtest_main
   PRIVATE thread)
-gtest_discover_tests(test_unit_util)
-
+gtest_discover_tests(test_unit_util
+  EXTRA_ARGS --gtest_catch_exceptions=0)
