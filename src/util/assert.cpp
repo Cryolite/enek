@@ -7,6 +7,11 @@
 #include <utility>
 #include <cstdlib>
 
+
+#if defined(ENEK_ENABLE_COVERAGE)
+extern "C" void __gcov_flush();
+#endif // defined(ENEK_ENABLE_COVERAGE)
+
 namespace Enek::Detail{
 
 AbortMessenger::AbortMessenger(char const *function_name,
@@ -62,6 +67,9 @@ AbortMessenger::~AbortMessenger()
     std::cerr << "Backtrace:\n" << stacktrace_ << '\n';
   }
   std::cerr << std::flush;
+#if defined(ENEK_ENABLE_COVERAGE)
+  __gcov_flush();
+#endif // defined(ENEK_ENABLE_COVERAGE)
   std::abort();
 }
 

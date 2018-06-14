@@ -9,12 +9,19 @@
 #include <cstdlib>
 
 
+#if defined(ENEK_ENABLE_COVERAGE)
+extern "C" void __gcov_flush();
+#endif // defined(ENEK_ENABLE_COVERAGE)
+
 namespace Enek::Detail{
 
 [[noreturn]] void TerminateHandlerSetter::terminate_handler_() noexcept
 {
   std::exception_ptr const p = std::current_exception();
   if (!p) {
+#if defined(ENEK_ENABLE_COVERAGE)
+    __gcov_flush();
+#endif // defined(ENEK_ENABLE_COVERAGE)
     std::abort();
   }
   try {
@@ -51,6 +58,9 @@ namespace Enek::Detail{
     }
     std::cerr << std::flush;
   }
+#if defined(ENEK_ENABLE_COVERAGE)
+  __gcov_flush();
+#endif // defined(ENEK_ENABLE_COVERAGE)
   std::abort();
 }
 

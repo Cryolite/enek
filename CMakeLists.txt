@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 message("CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
 if (ENEK_ENABLE_COVERAGE)
+  add_definitions(-DENEK_ENABLE_COVERAGE)
   add_compile_options("-coverage")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -coverage")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage")
