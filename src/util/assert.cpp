@@ -53,7 +53,7 @@ AbortMessenger::~AbortMessenger()
   std::cerr << file_name_ << ':' << line_number_ << ": " << function_name_
             << ": " << "Assertion `" << expression_ << "' failed.\n";
   if (!oss_.str().empty()) {
-    std::cerr << ' ' << oss_.str() << '\n';
+    std::cerr << oss_.str() << '\n';
   }
   if (*git_commit_hash_ != 0) {
     std::cerr << "Git commit hash: " << git_commit_hash_ << '\n';
