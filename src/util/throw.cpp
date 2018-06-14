@@ -4,62 +4,59 @@
 #include <boost/exception/exception.hpp>
 #include <boost/stacktrace/stacktrace.hpp>
 #include <iostream>
-#include <memory>
-#include <stdexcept>
+#include <ostream>
 #include <exception>
-#include <typeinfo>
 #include <cstdlib>
 
-namespace Enek{ namespace{
 
-class TerminateHandlerSetter
+namespace Enek::Detail{
+
+[[noreturn]] void TerminateHandlerSetter::terminate_handler_() noexcept
 {
-private:
-  [[noreturn]] static void terminate_handler_() noexcept
-  {
-    std::exception_ptr const p = std::current_exception();
-    if (!p) {
-      std::abort();
-    }
-    try {
-      std::rethrow_exception(p);
-    }
-    catch (boost::exception const &e) {
-      std::cerr << "Terminate called after throwing an instance of '"
-                << Enek::getTypeName(e) << "'\n";
-      if (char const * const *p
-            = boost::get_error_info<boost::throw_file>(e)) {
-        std::cerr << *p << ':';
-      }
-      if (int const *p = boost::get_error_info<boost::throw_line>(e)) {
-        std::cerr << *p << ':';
-      }
-      if (char const * const *p
-            = boost::get_error_info<boost::throw_function>(e)) {
-        std::cerr << *p << ": ";
-      }
-      if (std::exception const *p = dynamic_cast<std::exception const *>(&e)) {
-        std::cerr << p->what();
-      }
-      std::cerr << '\n';
-      if (boost::stacktrace::stacktrace const *p
-            = boost::get_error_info<Enek::StackTraceErrorInfo>(e)) {
-        if (p->size() != 0) {
-          std::cerr << "Backtrace:\n";
-          std::cerr << *p << '\n';
-        }
-      }
-    }
+  std::exception_ptr const p = std::current_exception();
+  if (!p) {
     std::abort();
   }
-
-public:
-  TerminateHandlerSetter() noexcept
-  {
-    std::set_terminate(&terminate_handler_);
+  try {
+    std::rethrow_exception(p);
   }
-}; // class TerminateHandlerSetter
+  catch (boost::exception const &e) {
+    std::cerr << "`std::terminate' is called after throwing an instance of `"
+              << Enek::getTypeName(e) << "'.\n";
+    if (char const * const * const p
+          = boost::get_error_info<boost::throw_file>(e)) {
+      std::cerr << *p << ':';
+    }
+    if (int const *p = boost::get_error_info<boost::throw_line>(e)) {
+      std::cerr << *p << ": ";
+    }
+    if (char const * const * const p
+          = boost::get_error_info<boost::throw_function>(e)) {
+      std::cerr << *p << ": ";
+    }
+    if (std::exception const *p = dynamic_cast<std::exception const *>(&e)) {
+      std::cerr << p->what();
+    }
+    std::cerr << '\n';
+    if (char const * const * const p
+          = boost::get_error_info<Enek::GitCommitHashErrorInfo>(e)) {
+      std::cerr << "Git commit hash: " << *p << '\n';
+    }
+    if (boost::stacktrace::stacktrace const * const p
+          = boost::get_error_info<Enek::StackTraceErrorInfo>(e)) {
+      if (p->size() != 0) {
+        std::cerr << "Backtrace:\n";
+        std::cerr << *p << '\n';
+      }
+    }
+    std::cerr << std::flush;
+  }
+  std::abort();
+}
 
-TerminateHandlerSetter terminate_handler_setter;
+TerminateHandlerSetter::TerminateHandlerSetter() noexcept
+{
+  std::set_terminate(&terminate_handler_);
+}
 
-}} // namespace Enek::*unnamed*
+} // namespace Enek::Detail

@@ -10,6 +10,7 @@
 #include <ostream>
 #include <utility>
 
+
 namespace Enek{
 
 namespace Detail{
@@ -85,5 +86,29 @@ private:
     __LINE__,                                    \
     ::boost::stacktrace::stacktrace(),           \
     ENEK_GIT_COMMIT_HASH)
+
+namespace Enek::Detail{
+
+class TerminateHandlerSetter
+{
+private:
+  [[noreturn]] static void terminate_handler_() noexcept;
+
+public:
+  TerminateHandlerSetter() noexcept;
+
+  TerminateHandlerSetter(TerminateHandlerSetter const &) = delete;
+
+  TerminateHandlerSetter &operator=(TerminateHandlerSetter const &) = delete;
+}; // class TerminateHandlerSetter
+
+// The initialization of this variable triggers the establishment of a function
+// provided by this program as a customized handler function for terminating
+// exception processing. If the following variable definition (not declaration)
+// moves to a .cpp file, the initialization may not execute unless some
+// function that compiles in the same translation unit is called.
+inline TerminateHandlerSetter terminate_handler_setter;
+
+} // namespace Enek::Detail
 
 #endif // !defined(ENEK_UTIL_THROW_HPP_INCLUDE_GUARD)
