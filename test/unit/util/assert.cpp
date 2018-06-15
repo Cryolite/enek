@@ -11,8 +11,8 @@ TEST(UtilAssertTest, testWithoutMessage)
 {
   static_assert(SIGABRT == 6);
 #if defined(ENEK_ENABLE_ASSERT)
-  ASSERT_EXIT(ENEK_ASSERT(false);,
-              [](int exit_code) { return exit_code == 128 + SIGABRT; },
+  EXPECT_EXIT(ENEK_ASSERT(false);,
+              ::testing::KilledBySignal(SIGABRT),
               R"(assert\.cpp:18: .+: Assertion `false' failed\.
 (Git commit hash: |Backtrace:
 ))");
@@ -24,8 +24,8 @@ TEST(UtilAssertTest, testWithoutMessage)
 TEST(UtilAssertTest, testMessage)
 {
 #if defined(ENEK_ENABLE_ASSERT)
-  ASSERT_EXIT(ENEK_ASSERT(false) << "Death message.";,
-              [](int exit_code) { return exit_code == 128 + SIGABRT; },
+  EXPECT_EXIT(ENEK_ASSERT(false) << "Death message.";,
+              ::testing::KilledBySignal(SIGABRT),
               R"(assert\.cpp:32: .+: Assertion `false' failed\.
 Death message\.
 (Git commit hash: |Backtrace:
@@ -38,9 +38,9 @@ Death message\.
 TEST(UtilAssertTest, testOStreamManipulator)
 {
 #if defined(ENEK_ENABLE_ASSERT)
-  ASSERT_EXIT(ENEK_ASSERT(false) << "First line." << std::endl
+  EXPECT_EXIT(ENEK_ASSERT(false) << "First line." << std::endl
               << "Second line.";,
-              [](int exit_code) { return exit_code == 128 + SIGABRT; },
+              ::testing::KilledBySignal(SIGABRT),
               R"(assert\.cpp:48: .+: Assertion `false' failed\.
 First line.
 Second line.
@@ -66,8 +66,8 @@ std::ios &getMessage(std::ios &ios)
 TEST(UtilAssertTest, testIosManipulator)
 {
 #if defined(ENEK_ENABLE_ASSERT)
-  ASSERT_EXIT(ENEK_ASSERT(false) << getMessage;,
-              [](int exit_code) { return exit_code == 128 + SIGABRT; },
+  EXPECT_EXIT(ENEK_ASSERT(false) << getMessage;,
+              ::testing::KilledBySignal(SIGABRT),
               R"(assert\.cpp:74: .+: Assertion `false' failed.
 `std::ios' manipulator\.
 (Git commit hash: |Backtrace:
@@ -80,8 +80,8 @@ TEST(UtilAssertTest, testIosManipulator)
 TEST(UtilAssertTest, testIosBaseManipulator)
 {
 #if defined(ENEK_ENABLE_ASSERT)
-  ASSERT_EXIT(ENEK_ASSERT(false) << std::boolalpha << false;,
-              [](int exit_code) { return exit_code == 128 + SIGABRT; },
+  EXPECT_EXIT(ENEK_ASSERT(false) << std::boolalpha << false;,
+              ::testing::KilledBySignal(SIGABRT),
               R"(assert\.cpp:88: .+: Assertion `false' failed.
 false
 (Git commit hash: |Backtrace:
