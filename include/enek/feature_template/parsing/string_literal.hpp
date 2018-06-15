@@ -2,7 +2,7 @@
 #define ENEK_FEATURE_TEMPLATE_PARSING_STRING_LITERAL_HPP_INCLUDE_GUARD
 
 #include <enek/feature_template/parsing/print_message.hpp>
-#include <enek/unicode/append_code_point.hpp>
+#include <enek/unicode/utf8.hpp>
 #include <enek/unicode/char.hpp>
 #include <ostream>
 #include <string>
