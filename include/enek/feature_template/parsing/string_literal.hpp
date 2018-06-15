@@ -118,7 +118,6 @@ public:
         }
         ENEK_ASSERT(c <= Enek::Unicode::getCharMaxValue());
         ENEK_ASSERT(!Enek::Unicode::GeneralCategory::isOtherSurrogate(c));
-        ENEK_ASSERT(!Enek::Unicode::GeneralCategory::isUnassigned(c));
         value_.push_back(c);
         break;
       }
@@ -175,15 +174,6 @@ public:
           Enek::FeatureTemplate::Parsing::printMessage(
             path, text_range, parse_range, escape_range,
             "error: A hexadecimal escape sequence is a surrogate code point.",
-            os);
-          error = true;
-          break;
-        }
-        if (Enek::Unicode::GeneralCategory::isUnassigned(c)) {
-          IteratorRange const escape_range(escape_first, iter);
-          Enek::FeatureTemplate::Parsing::printMessage(
-            path, text_range, parse_range, escape_range,
-            "error: A hexadecimal escape sequence is an unassigned code point.",
             os);
           error = true;
           break;

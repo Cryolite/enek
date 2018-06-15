@@ -19,12 +19,6 @@ bool isOtherSurrogate(char32_t c) noexcept
   return u_charType(c) == UCharCategory::U_SURROGATE;
 }
 
-bool isUnassigned(char32_t c) noexcept
-{
-  ENEK_ASSERT(c <= getCharMaxValue());
-  return u_charType(c) == UCharCategory::U_GENERAL_OTHER_TYPES;
-}
-
 } // namespace GeneralCategory
 
 } // namespace Enek::Unicode

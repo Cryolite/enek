@@ -9,8 +9,6 @@ namespace GeneralCategory{
 
 bool isOtherSurrogate(char32_t c) noexcept;
 
-bool isUnassigned(char32_t c) noexcept;
-
 } // namespace GeneralCategory
 
 } // namespace Enek::Unicode
