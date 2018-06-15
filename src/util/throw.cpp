@@ -15,50 +15,72 @@ extern "C" void __gcov_flush();
 
 namespace Enek::Detail{
 
+namespace{
+
+void printCommonErrorMessage()
+{
+  if (ENEK_GIT_COMMIT_HASH[0] != '\0') {
+    std::cerr << "Git commit hash: " << ENEK_GIT_COMMIT_HASH << '\n';
+  }
+  boost::stacktrace::stacktrace stacktrace;
+  if (!stacktrace.empty()) {
+    std::cerr << "Backtrace:\n" << stacktrace;
+  }
+}
+
+} // namespace *unnamed*
+
 [[noreturn]] void TerminateHandlerSetter::terminate_handler_() noexcept
 {
   std::exception_ptr const p = std::current_exception();
-  if (!p) {
-#if defined(ENEK_ENABLE_COVERAGE)
-    __gcov_flush(); std::abort();
-#else // defined(ENEK_ENABLE_COVERAGE)
-    std::abort();
-#endif // defined(ENEK_ENABLE_COVERAGE)
-  }
-  try {
-    std::rethrow_exception(p);
-  }
-  catch (boost::exception const &e) {
-    std::cerr << "`std::terminate' is called after throwing an instance of `"
-              << Enek::getTypeName(e) << "'.\n";
-    if (char const * const * const p
-          = boost::get_error_info<boost::throw_file>(e)) {
-      std::cerr << *p << ':';
+  if (p != nullptr) {
+    try {
+      std::rethrow_exception(p);
     }
-    if (int const *p = boost::get_error_info<boost::throw_line>(e)) {
-      std::cerr << *p << ": ";
-    }
-    if (char const * const * const p
-          = boost::get_error_info<boost::throw_function>(e)) {
-      std::cerr << *p << ": ";
-    }
-    if (std::exception const *p = dynamic_cast<std::exception const *>(&e)) {
-      std::cerr << p->what();
-    }
-    std::cerr << '\n';
-    if (char const * const * const p
-          = boost::get_error_info<Enek::GitCommitHashErrorInfo>(e)) {
-      std::cerr << "Git commit hash: " << *p << '\n';
-    }
-    if (boost::stacktrace::stacktrace const * const p
-          = boost::get_error_info<Enek::StackTraceErrorInfo>(e)) {
-      if (p->size() != 0) {
-        std::cerr << "Backtrace:\n";
-        std::cerr << *p;
+    catch (boost::exception const &e) {
+      std::cerr << "`std::terminate' is called after throwing an instance of `"
+                << Enek::getTypeName(e) << "'.\n";
+      if (char const * const * const p
+            = boost::get_error_info<boost::throw_file>(e)) {
+        std::cerr << *p << ':';
+      }
+      if (int const *p = boost::get_error_info<boost::throw_line>(e)) {
+        std::cerr << *p << ": ";
+      }
+      if (char const * const * const p
+            = boost::get_error_info<boost::throw_function>(e)) {
+        std::cerr << *p << ": ";
+      }
+      if (std::exception const *p = dynamic_cast<std::exception const *>(&e)) {
+        std::cerr << p->what();
+      }
+      std::cerr << '\n';
+      if (char const * const * const p
+            = boost::get_error_info<Enek::GitCommitHashErrorInfo>(e)) {
+        std::cerr << "Git commit hash: " << *p << '\n';
+      }
+      if (boost::stacktrace::stacktrace const * const p
+            = boost::get_error_info<Enek::StackTraceErrorInfo>(e)) {
+        if (p->size() != 0) {
+          std::cerr << "Backtrace:\n" << *p;
+        }
       }
     }
-    std::cerr << std::flush;
+    catch (std::exception const &e) {
+      std::cerr << "`std::terminate' is called after throwing an instance of `"
+                << Enek::getTypeName(e) << "'.\n" << e.what() << '\n';
+      printCommonErrorMessage();
+    }
+    catch (...) {
+      std::cerr << "`std::terminate' is called after throwing an instance of an unknown type.\n";
+      printCommonErrorMessage();
+    }
   }
+  else {
+    std::cerr << "`std::terminate' is called without throwing any exception.\n";
+    printCommonErrorMessage();
+  }
+  std::cerr << std::flush;
 #if defined(ENEK_ENABLE_COVERAGE)
   __gcov_flush(); std::abort();
 #else // defined(ENEK_ENABLE_COVERAGE)

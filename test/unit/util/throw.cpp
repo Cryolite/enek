@@ -118,9 +118,10 @@ TEST(UtilThrowTest, testTerminateWithoutMessage)
   EXPECT_EXIT([]() noexcept { ENEK_THROW(std::runtime_error); }();,
               ::testing::KilledBySignal(SIGABRT),
               R"(^`std::terminate' is called after throwing an instance of `.+'\.
-.*throw\.cpp:123: .*UtilThrowTest.*testTerminateWithoutMessage.*: 
-(Git commit hash: |Backtrace:
-))");
+.*throw\.cpp:124: .*UtilThrowTest.*testTerminateWithoutMessage.*: 
+(Git commit hash: [[:xdigit:]]+
+)?Backtrace:
+)");
 }
 
 TEST(UtilThrowTest, testTerminate)
@@ -129,7 +130,42 @@ TEST(UtilThrowTest, testTerminate)
     []() noexcept { ENEK_THROW(std::runtime_error) << "An error message."; }();,
     ::testing::KilledBySignal(SIGABRT),
     R"(^`std::terminate' is called after throwing an instance of `.+'\.
-.*throw\.cpp:134: .*UtilThrowTest.*testTerminate.*: An error message.
-(Git commit hash: |Backtrace:
-))");
+.*throw\.cpp:136: .*UtilThrowTest.*testTerminate.*: An error message\.
+(Git commit hash: [[:xdigit:]]+
+)?Backtrace:
+)");
+}
+
+TEST(UtilThrowTest, testTerminateHandlerWithStdException)
+{
+  EXPECT_EXIT(
+    []() noexcept { throw std::runtime_error("An error message."); }();,
+    ::testing::KilledBySignal(SIGABRT),
+    R"(^`std::terminate' is called after throwing an instance of `.+'\.
+An error message\.
+(Git commit hash: [[:xdigit:]]+
+)?Backtrace:
+)");
+}
+
+TEST(UtilThrowTest, testTerminateHandlerWithUnknownException)
+{
+  EXPECT_EXIT(
+    []() noexcept { throw 0; }();,
+    ::testing::KilledBySignal(SIGABRT),
+    R"(^`std::terminate' is called after throwing an instance of an unknown type\.
+(Git commit hash: [[:xdigit:]]+
+)?Backtrace:
+)");
+}
+
+TEST(UtilThrowTest, testDirectCallOfTerminateHandler)
+{
+  EXPECT_EXIT(
+    std::terminate();,
+    ::testing::KilledBySignal(SIGABRT),
+    R"(^`std::terminate' is called without throwing any exception\.
+(Git commit hash: [[:xdigit:]]+
+)?Backtrace:
+)");
 }

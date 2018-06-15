@@ -8,6 +8,10 @@ message("CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+  add_compile_options(-Werror)
+endif()
+
 message("CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
 if (ENEK_ENABLE_COVERAGE)
