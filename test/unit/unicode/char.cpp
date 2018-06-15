@@ -7,7 +7,7 @@ TEST(UnicodeCharTest, testGetCharMaxValue)
   EXPECT_EQ(0x10FFFF, Enek::Unicode::getCharMaxValue());
 }
 
-TEST(UtilCharTest, testIsOtherSurrogate)
+TEST(UnicodeCharTest, testIsOtherSurrogate)
 {
   using Enek::Unicode::GeneralCategory::isOtherSurrogate;
   EXPECT_FALSE(isOtherSurrogate(U'\uD7FF'));

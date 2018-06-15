@@ -1,5 +1,6 @@
 add_executable(test_unit_unicode
-  char.cpp)
+  char.cpp
+  utf8.cpp)
 target_link_libraries(test_unit_unicode
   PRIVATE unicode
   PRIVATE gtest_main
