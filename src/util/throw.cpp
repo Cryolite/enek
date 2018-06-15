@@ -9,13 +9,21 @@
 #include <cstdlib>
 
 
+#if defined(ENEK_ENABLE_COVERAGE)
+extern "C" void __gcov_flush();
+#endif // defined(ENEK_ENABLE_COVERAGE)
+
 namespace Enek::Detail{
 
 [[noreturn]] void TerminateHandlerSetter::terminate_handler_() noexcept
 {
   std::exception_ptr const p = std::current_exception();
   if (!p) {
+#if defined(ENEK_ENABLE_COVERAGE)
+    __gcov_flush(); std::abort();
+#else // defined(ENEK_ENABLE_COVERAGE)
     std::abort();
+#endif // defined(ENEK_ENABLE_COVERAGE)
   }
   try {
     std::rethrow_exception(p);
@@ -46,12 +54,16 @@ namespace Enek::Detail{
           = boost::get_error_info<Enek::StackTraceErrorInfo>(e)) {
       if (p->size() != 0) {
         std::cerr << "Backtrace:\n";
-        std::cerr << *p << '\n';
+        std::cerr << *p;
       }
     }
     std::cerr << std::flush;
   }
+#if defined(ENEK_ENABLE_COVERAGE)
+  __gcov_flush(); std::abort();
+#else // defined(ENEK_ENABLE_COVERAGE)
   std::abort();
+#endif // defined(ENEK_ENABLE_COVERAGE)
 }
 
 TerminateHandlerSetter::TerminateHandlerSetter() noexcept

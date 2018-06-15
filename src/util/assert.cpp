@@ -7,6 +7,11 @@
 #include <utility>
 #include <cstdlib>
 
+
+#if defined(ENEK_ENABLE_COVERAGE)
+extern "C" void __gcov_flush();
+#endif // defined(ENEK_ENABLE_COVERAGE)
+
 namespace Enek::Detail{
 
 AbortMessenger::AbortMessenger(char const *function_name,
@@ -59,10 +64,14 @@ AbortMessenger::~AbortMessenger()
     std::cerr << "Git commit hash: " << git_commit_hash_ << '\n';
   }
   if (stacktrace_) {
-    std::cerr << "Backtrace:\n" << stacktrace_ << '\n';
+    std::cerr << "Backtrace:\n" << stacktrace_;
   }
   std::cerr << std::flush;
+#if defined(ENEK_ENABLE_COVERAGE)
+  __gcov_flush(); std::abort();
+#else // defined(ENEK_ENABLE_COVERAGE)
   std::abort();
+#endif // defined(ENEK_ENABLE_COVERAGE)
 }
 
 } // namespace Enek::Detail

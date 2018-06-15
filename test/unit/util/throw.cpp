@@ -116,7 +116,7 @@ TEST(UtilThrowTest, testMessage)
 TEST(UtilThrowTest, testTerminateWithoutMessage)
 {
   EXPECT_EXIT([]() noexcept { ENEK_THROW(std::runtime_error); }();,
-              [](int exit_code) { return exit_code == 128 + SIGABRT; },
+              ::testing::KilledBySignal(SIGABRT),
               R"(^`std::terminate' is called after throwing an instance of `.+'\.
 .*throw\.cpp:123: .*UtilThrowTest.*testTerminateWithoutMessage.*: 
 (Git commit hash: |Backtrace:
@@ -127,7 +127,7 @@ TEST(UtilThrowTest, testTerminate)
 {
   EXPECT_EXIT(
     []() noexcept { ENEK_THROW(std::runtime_error) << "An error message."; }();,
-    [](int exit_code) { return exit_code == 128 + SIGABRT; },
+    ::testing::KilledBySignal(SIGABRT),
     R"(^`std::terminate' is called after throwing an instance of `.+'\.
 .*throw\.cpp:134: .*UtilThrowTest.*testTerminate.*: An error message.
 (Git commit hash: |Backtrace:
