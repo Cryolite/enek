@@ -13,6 +13,7 @@ Execute unit tests.
 
   --docker                   Build and run test code on a Docker container.
   --build-dir=DIR            Use `DIR' as a build directory.
+  -v, --verbose              Turn on verbose output.
   -j, --concurrency=(N|auto) Run `N' tests concurrently, or determine a
                              suitable value by `auto'.
   --debug                    Debug build.
@@ -38,7 +39,7 @@ function on_invalid_argument ()
   print_error_message "Try \`test --help' for more information."
 }
 
-opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l docker,build-dir:,concurrency:,debug,release,enable-coverage,disable-coverage,enable-asan,disable-asan,enable-ubsan,disable-ubsan,enable-tsan,disable-tsan,enable-assert,disable-assert,help -- j:h "$@")"
+opts="$(getopt -n "$SOURCE_PATH_RELATIVE" -l docker,build-dir:,verbose,concurrency:,debug,release,enable-coverage,disable-coverage,enable-asan,disable-asan,enable-ubsan,disable-ubsan,enable-tsan,disable-tsan,enable-assert,disable-assert,help -- vj:h "$@")"
 eval set -- "$opts"
 
 if test -z "$CC"; then
@@ -72,6 +73,9 @@ while test "$#" -ne 0; do
     fi
     build_dir="$1"
     shift
+    ;;
+  '-v'|'--verbose')
+    verbose=yes
     ;;
   '-j'|'--concurrency')
     if test "$#" -eq 0; then
@@ -283,6 +287,12 @@ else
   exit 1
 fi
 
+make_vars=()
+
+if test -v verbose; then
+  make_vars+=('VERBOSE=1')
+fi
+
 make_options=()
 
 if test -v concurrency; then
@@ -294,5 +304,5 @@ mkdir -p "$build_dir"
 # CMake command runs test executables in order to list tests.
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib"
 (cd "$build_dir" && cmake "${cmake_options[@]}" "$ENEK_ROOT_DIR")
-(cd "$build_dir" && make "${make_options[@]}")
+(cd "$build_dir" && env "${make_vars[@]}" make "${make_options[@]}")
 (cd "$build_dir" && "$ENEK_ROOT_DIR/libexec/backtrace-filter" -- make "${make_options[@]}" test 'ARGS=--output-on-failure')
