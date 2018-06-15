@@ -5,6 +5,8 @@
 #include <enek/feature_template/parsing/text_position_iterator.hpp>
 #include <boost/spirit/include/qi_parse.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <boost/range/end.hpp>
+#include <boost/range/begin.hpp>
 #include <filesystem>
 #include <ostream>
 #include <string>
@@ -21,17 +23,17 @@ parse(Path const &path, std::string const &text, std::ostream &os)
   namespace qi = boost::spirit::qi;
   namespace Parsing = Enek::FeatureTemplate::Parsing;
   using BaseIterator = std::string::const_iterator;
-  BaseIterator const first = text.cbegin();
-  BaseIterator const last = text.cend();
   using BaseIteratorRange = boost::iterator_range<BaseIterator>;
-  BaseIteratorRange const text_range(first, last);
+  BaseIteratorRange const text_range(text.cbegin(), text.cend());
   using Iterator = Parsing::TextPositionIterator<BaseIterator>;
+  using IteratorRange = boost::iterator_range<Iterator>;
+  IteratorRange parse_range = Iterator::makeIteratorRange(text_range);
+  Iterator first = boost::begin(parse_range);
+  Iterator last = boost::end(parse_range);
   Parsing::Grammar<Iterator> grammar(path, text_range, os);
   Parsing::SkipGrammar<Iterator> skip_grammar;
-  Iterator first_, last_;
-  std::tie(first_, last_) = Iterator::makeIteratorRange(first, last);
   Parsing::AST ast;
-  qi::phrase_parse(first_, std::move(last_), grammar, skip_grammar, ast);
+  qi::phrase_parse(first, std::move(last), grammar, skip_grammar, ast);
   return ast;
 }
 

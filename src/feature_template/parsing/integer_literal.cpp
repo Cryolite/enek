@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <cstdint>
 
+
 namespace Enek::FeatureTemplate::Parsing{
 
 IntegerLiteral::IntegerLiteral() noexcept
@@ -31,27 +32,6 @@ bool IntegerLiteral::succeed() const noexcept
 {
   ENEK_ASSERT(this->isInitialized());
   return !error_;
-}
-
-void IntegerLiteral::swap(IntegerLiteral &rhs) noexcept
-{
-  using std::swap;
-  swap(initialized_, rhs.initialized_);
-  swap(error_,       rhs.error_);
-  swap(value_,       rhs.value_);
-}
-
-void swap(IntegerLiteral &lhs, IntegerLiteral &rhs) noexcept
-{
-  lhs.swap(rhs);
-}
-
-IntegerLiteral &IntegerLiteral::operator=(IntegerLiteral const &rhs) noexcept
-{
-  ENEK_ASSERT(rhs.isInitialized());
-  ENEK_ASSERT(!this->isInitialized());
-  IntegerLiteral(rhs).swap(*this);
-  return *this;
 }
 
 std::int_fast64_t IntegerLiteral::getValue() const noexcept

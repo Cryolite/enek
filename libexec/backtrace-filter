@@ -90,7 +90,7 @@ function filter ()
          addr2line="$(addr2line -e "$file" -f "$addr2" | tr '\n' ':')"
          func="$(echo "$addr2line" | cut -d ':' -f 1 | c++filt)"
          file="$(echo "$addr2line" | cut -d ':' -f 2)"
-         lineno="$(echo "$addr2line" | cut -d ':' -f 3)"
+         lineno="$(echo "$addr2line" | cut -d ':' -f 3 | sed -e 's/ (discriminator [0-9]\+)//'))"
          if test x"$func"x = x??x -o x"$file"x = x??x -o x"$lineno"x = x?x; then
            echo "$line"
          else
@@ -117,11 +117,11 @@ function filter ()
          addr2line="$(addr2line -e "$file" -f "$addr" | tr '\n' ':')"
          func="$(echo "$addr2line" | cut -d ':' -f 1 | c++filt)"
          file="$(echo "$addr2line" | cut -d ':' -f 2)"
-         lineno="$(echo "$addr2line" | cut -d ':' -f 3)"
+         lineno="$(echo "$addr2line" | cut -d ':' -f 3 | sed -e 's/ (discriminator [0-9]\+)//')"
          if test x"$func"x = x??x -o x"$file"x = x??x -o x"$lineno"x = x?x; then
            echo "$line"
          else
-           echo "$header$func at $file:$line"
+           echo "$header$func at $file:$lineno"
          fi
        else
          echo "$line"

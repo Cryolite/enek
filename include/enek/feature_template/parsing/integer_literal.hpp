@@ -40,6 +40,10 @@ public:
     ENEK_ASSERT(value_ == 0);
     ENEK_ASSERT(boost::begin(parse_range) != boost::end(parse_range));
     Iterator iter = boost::begin(parse_range);
+    if (!iter.holdsTextPosition()) {
+      ENEK_THROW(std::invalid_argument)
+        << "The argument `parse_range' does not have any text position.";
+    }
     Iterator const parse_last = boost::end(parse_range);
     if (*iter != '-') {
       for (; iter != parse_last; ++iter) {
@@ -96,12 +100,6 @@ public:
   }
 
   bool succeed() const noexcept;
-
-  void swap(IntegerLiteral &rhs) noexcept;
-
-  friend void swap(IntegerLiteral &lhs, IntegerLiteral &rhs) noexcept;
-
-  IntegerLiteral &operator=(IntegerLiteral const &rhs) noexcept;
 
   std::int_fast64_t getValue() const noexcept;
 

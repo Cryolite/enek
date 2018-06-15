@@ -125,7 +125,7 @@ void AST::moveAssign(ASTNode &&root_node)
     << "info: The type of `root_node' is `" << Enek::getTypeName(root_node)
     << "'." << std::endl;
   ENEK_ASSERT(!this->isInitialized());
-  root_node_ = std::move(root_node);
+  root_node_.emplace<ASTNode>(std::move(root_node));
 }
 
 template
