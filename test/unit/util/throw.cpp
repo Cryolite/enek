@@ -13,7 +13,7 @@ TEST(UtilThrowTest, testWithoutMessage)
 {
   std::exception_ptr p;
   try {
-    ENEK_THROW(std::runtime_error);
+    ENEK_THROW<std::runtime_error>("");
   }
   catch (...) {
     p = std::current_exception();
@@ -65,7 +65,7 @@ TEST(UtilThrowTest, testMessage)
 {
   std::exception_ptr p;
   try {
-    ENEK_THROW(std::runtime_error) << "An error message.";
+    ENEK_THROW<std::runtime_error>("An error message.");
   }
   catch (...) {
     p = std::current_exception();
@@ -115,7 +115,7 @@ TEST(UtilThrowTest, testMessage)
 
 TEST(UtilThrowTest, testTerminateWithoutMessage)
 {
-  EXPECT_EXIT([]() noexcept { ENEK_THROW(std::runtime_error); }();,
+  EXPECT_EXIT([]() noexcept { ENEK_THROW<std::runtime_error>(""); }();,
               ::testing::KilledBySignal(SIGABRT),
               R"(^`std::terminate' is called after throwing an instance of `.+'\.
 .*throw\.cpp:124: .*UtilThrowTest.*testTerminateWithoutMessage.*: 
@@ -127,7 +127,7 @@ TEST(UtilThrowTest, testTerminateWithoutMessage)
 TEST(UtilThrowTest, testTerminate)
 {
   EXPECT_EXIT(
-    []() noexcept { ENEK_THROW(std::runtime_error) << "An error message."; }();,
+    []() noexcept { ENEK_THROW<std::runtime_error>("An error message."); }();,
     ::testing::KilledBySignal(SIGABRT),
     R"(^`std::terminate' is called after throwing an instance of `.+'\.
 .*throw\.cpp:136: .*UtilThrowTest.*testTerminate.*: An error message\.

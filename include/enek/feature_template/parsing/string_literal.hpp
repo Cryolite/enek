@@ -155,7 +155,7 @@ public:
         if (overflow) {
           IteratorRange const escape_range(escape_first, iter);
           Enek::FeatureTemplate::Parsing::printMessage(
-            path, text_range, parse_range, escape_range,
+            path, text_range, escape_range,
             "error: A hexadecimal escape sequence is out of range.", os);
           error = true;
           break;
@@ -163,7 +163,7 @@ public:
         if (c > Enek::Unicode::getCharMaxValue()) {
           IteratorRange const escape_range(escape_first, iter);
           Enek::FeatureTemplate::Parsing::printMessage(
-            path, text_range, parse_range, escape_range,
+            path, text_range, escape_range,
             "error: A hexadecimal escape sequence exceeds the highest Unicode "
             "code point value.", os);
           error = true;
@@ -172,7 +172,7 @@ public:
         if (Enek::Unicode::GeneralCategory::isOtherSurrogate(c)) {
           IteratorRange const escape_range(escape_first, iter);
           Enek::FeatureTemplate::Parsing::printMessage(
-            path, text_range, parse_range, escape_range,
+            path, text_range, escape_range,
             "error: A hexadecimal escape sequence is a surrogate code point.",
             os);
           error = true;
@@ -184,7 +184,7 @@ public:
       case 'u':
       {
         std::size_t n = 4;
-        ENEK_THROW(std::invalid_argument);
+        ENEK_THROW<std::invalid_argument>("TODO: Unimplemented.");
       }
       case 'U':
       {
@@ -218,7 +218,7 @@ public:
         break;
       }
       default:
-        ENEK_THROW(std::logic_error);
+        ENEK_THROW<std::logic_error>("");
       }
     }
     initialized_ = true;

@@ -59,8 +59,8 @@ double FloatingLiteral::getValue() const noexcept
 void FloatingLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
-    ENEK_THROW(std::invalid_argument)
-      << "error: `dumpXML' is called on an uninitialized `FloatingLiteral'.";
+    ENEK_THROW<std::invalid_argument>(
+      "error: `dumpXML' is called on an uninitialized `FloatingLiteral'.");
   }
   os << "<floating_literal>" << value_ << "</floating_literal>";
 }
