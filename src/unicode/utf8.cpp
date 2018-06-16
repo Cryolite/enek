@@ -10,7 +10,7 @@
 #include <cstddef>
 
 
-namespace Enek::Unicode{
+namespace Enek::Unicode::UTF8{
 
 void appendCodePoint(std::string &s, char32_t c)
 {
@@ -37,4 +37,4 @@ void appendCodePoint(std::string &s, char32_t c)
   s.resize(i);
 }
 
-} // namespace Enek::Unicode
+} // namespace Enek::Unicode::UTF8

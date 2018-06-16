@@ -178,7 +178,7 @@ public:
           error = true;
           break;
         }
-        Enek::Unicode::appendCodePoint(value_, c);
+        Enek::Unicode::UTF8::appendCodePoint(value_, c);
         break;
       }
       case 'u':
