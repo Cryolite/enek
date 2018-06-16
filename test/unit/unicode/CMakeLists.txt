@@ -1,4 +1,5 @@
 add_executable(test_unit_unicode
+  icu_error.cpp
   char.cpp
   utf8.cpp)
 target_link_libraries(test_unit_unicode
