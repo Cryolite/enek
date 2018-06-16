@@ -1,5 +1,4 @@
 #include <enek/unicode/utf8.hpp>
-
 #include <enek/unicode/char.hpp>
 #include <enek/util/throw.hpp>
 #include <enek/util/assert.hpp>
@@ -15,8 +14,9 @@ namespace Enek::Unicode{
 
 void appendCodePoint(std::string &s, char32_t c)
 {
+  using std::placeholders::_1;
   if (c > Enek::Unicode::getCharMaxValue()) {
-    ENEK_THROW(std::invalid_argument)
+    ENEK_THROW<std::invalid_argument>(_1)
       << "The argument `c' (= `U+" << std::hex << std::uppercase
       << static_cast<std::uint_fast32_t>(c)
       << "') exceeds the highest Unicode code point value.";
@@ -29,7 +29,7 @@ void appendCodePoint(std::string &s, char32_t c)
   UBool is_error = false;
   U8_APPEND(p, i, s.size(), c, is_error);
   if (is_error) {
-    ENEK_THROW(std::logic_error)
+    ENEK_THROW<std::logic_error>(_1)
       << "Failed to append the Unicode code point `U+" << std::hex
       << std::uppercase << static_cast<std::uint_fast32_t>(c) << "'.";
   }
