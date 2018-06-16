@@ -38,7 +38,7 @@ void printMessage(std::filesystem::path const &path,
     }
   }
   Iterator iter = boost::begin(caret_range);
-  if (!iter.holdsTextPosition()) {
+  if (!iter.hasTextPosition()) {
     ENEK_THROW<std::invalid_argument>(
       "error: `boost::begin(caret_range)' does not have any text position.");
   }

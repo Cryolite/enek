@@ -11,6 +11,7 @@
 #include <limits>
 #include <cstddef>
 
+
 namespace Enek::FeatureTemplate::Parsing{
 
 template<typename Iterator>
@@ -168,7 +169,7 @@ public:
     return this->base_;
   }
 
-  bool holdsTextPosition() const noexcept
+  bool hasTextPosition() const noexcept
   {
     return line_number_ != invalid_line_number_;
   }
