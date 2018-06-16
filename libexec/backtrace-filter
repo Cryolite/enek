@@ -60,10 +60,10 @@ fi
 
 function filter ()
 {
-  local asan0_egrep='^ *#[[:digit:]]+ 0x[[:xdigit:]]+ in .* [^ :]+:[[:digit:]]+$'
-  local asan0_sed='s/^\( *#[[:digit:]]* \)\(0x[[:xdigit:]]*\) in \(.*\) \([^ :]*\):\([[:digit:]]*\)$/\1\t\2\t\3\t\4\t\5/'
-  local asan1_egrep='^ *#[[:digit:]]+ 0x[[:xdigit:]]+ in .* \([^)]+\+0x[[:xdigit:]]+\)$'
-  local asan1_sed='s/^\( *#[[:digit:]]* \)\(0x[[:xdigit:]]*\) in \(.*\) (\([^)]*\)+\(0x[[:xdigit:]]*\))$/\1\t\2\t\3\t\4\t\5/'
+  local asan0_egrep='#[[:digit:]]+ 0x[[:xdigit:]]+ in .* [^ :]+:[[:digit:]]+$'
+  local asan0_sed='s/\(#[[:digit:]]* \)\(0x[[:xdigit:]]*\) in \(.*\) \([^ :]*\):\([[:digit:]]*\)$/\1\t\2\t\3\t\4\t\5/'
+  local asan1_egrep='#[[:digit:]]+ 0x[[:xdigit:]]+ in .* \([^)]+\+0x[[:xdigit:]]+\)$'
+  local asan1_sed='s/\(#[[:digit:]]* \)\(0x[[:xdigit:]]*\) in \(.*\) (\([^)]*\)+\(0x[[:xdigit:]]*\))$/\1\t\2\t\3\t\4\t\5/'
   local boost0_egrep='^ *[[:digit:]]+# .* at [^ :]*:[[:digit:]]+$'
   local boost0_sed='s/^\( *[[:digit:]]*# \)\(.*\) at \([^ :]*\):\([[:digit:]]*\)$/\1\t\2\t\3\t\4/'
   local boost1_egrep='^ *[[:digit:]]+# 0x[[:xdigit:]]+ in .*$'
