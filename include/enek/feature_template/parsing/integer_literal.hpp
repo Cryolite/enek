@@ -40,6 +40,10 @@ public:
     ENEK_ASSERT(value_ == 0);
     ENEK_ASSERT(boost::begin(parse_range) != boost::end(parse_range));
     Iterator iter = boost::begin(parse_range);
+    if (!iter.hasTextPosition()) {
+      ENEK_THROW<std::invalid_argument>(
+        "The argument `parse_range' does not have any text position.");
+    }
     Iterator const parse_last = boost::end(parse_range);
     if (*iter != '-') {
       for (; iter != parse_last; ++iter) {
