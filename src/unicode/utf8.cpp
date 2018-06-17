@@ -77,12 +77,14 @@ std::size_t getWidthOnConsole(std::string const &str)
       p_ustr.get(), length, &length_, str.data(), str.size(), &error_code);
     ENEK_ASSERT(length_ == length);
     if (U_FAILURE(error_code)) {
+      // LCOV_EXCL_START
       if (error_code == UErrorCode::U_INVALID_CHAR_FOUND) {
         ENEK_THROW<std::logic_error>(
           "An already validated UTF-8 string is deemed invalid.");
       }
       ENEK_THROW<std::system_error>(
         static_cast<int>(error_code), Enek::Unicode::getICUErrorCategory());
+      // LCOV_EXCL_STOP
     }
   }
 
@@ -118,8 +120,10 @@ std::size_t getWidthOnConsole(std::string const &str)
         UChar32 c;
         U16_NEXT(p_ustr.get(), i, curr, c);
         if (Enek::Unicode::GeneralCategory::isOtherSurrogate(c)) {
+          // LCOV_EXCL_START
           ENEK_THROW<std::logic_error>(
             "`UBreakIterator' stops the point next to a high surrogate.");
+          // LCOV_EXCL_STOP
         }
         switch (Enek::Unicode::getEastAsianWidth(c)) {
         case EastAsianWidth::fullwidth:
@@ -140,27 +144,33 @@ std::size_t getWidthOnConsole(std::string const &str)
         case EastAsianWidth::neutral:
           width += 1;
           break;
+          // LCOV_EXCL_START
         default:
           ENEK_THROW<std::logic_error>(_1)
             << "An unknown `EastAsianWidth' value `" << c << "'.";
+          // LCOV_EXCL_STOP
         }
       }
       while (i < curr) {
         UChar32 c;
         U16_NEXT(p_ustr.get(), i, curr, c);
         if (Enek::Unicode::GeneralCategory::isOtherSurrogate(c)) {
+          // LCOV_EXCL_START
           ENEK_THROW<std::logic_error>(
             "`UBreakIterator' stops the point next to a high surrogate.");
+          // LCOV_EXCL_STOP
         }
         Enek::Unicode::EastAsianWidth const eaw
           = Enek::Unicode::getEastAsianWidth(c);
         if (eaw != EastAsianWidth::neutral && eaw != EastAsianWidth::ambiguous) {
+          // LCOV_EXCL_START
           ENEK_THROW<std::runtime_error>(_1)
             << "A character defined as other than `East Asian Neutral' and "
                "`East Asian Ambiguous' (see UAX #11 for more detail) is found "
                "in the " << i << "th code point of a grapheme cluster `"
             << Enek::Unicode::formatAsCodePoint(&p_ustr[prev], &p_ustr[curr])
             << "' (" << eaw << ").";
+          // LCOV_EXCL_STOP
         }
       }
       ENEK_ASSERT(i == curr) << "i = " << i << ", curr = " << curr;

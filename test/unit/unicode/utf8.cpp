@@ -78,6 +78,37 @@ TEST(UnicodeUtf8Test, testGetWidthOnConsole)
 {
   using Enek::Unicode::UTF8::getWidthOnConsole;
   {
+    // East Asian Fullwidth.
+    std::string str("\u3000");
+    EXPECT_EQ(2, getWidthOnConsole(str));
+  }
+  {
+    // East Asian Halfwidth.
+    std::string str("\u20A9");
+    EXPECT_EQ(1, getWidthOnConsole(str));
+  }
+  {
+    // East Asian Wide.
+    std::string str("\u1100");
+    EXPECT_EQ(2, getWidthOnConsole(str));
+  }
+  {
+    // East Asian Narrow.
+    std::string str("\u0020");
+    EXPECT_EQ(1, getWidthOnConsole(str));
+  }
+  {
+    // East Asian Ambiguous.
+    std::string str("\u0101");
+    EXPECT_EQ(1, getWidthOnConsole(str));
+  }
+  {
+    // East Asian Neutral.
+    std::string str("\u007F");
+    EXPECT_EQ(1, getWidthOnConsole(str));
+  }
+  {
+    // A grapheme cluster of multiple code points.
     std::string str("\u0067\u0308");
     EXPECT_EQ(1, getWidthOnConsole(str));
   }
@@ -86,6 +117,7 @@ TEST(UnicodeUtf8Test, testGetWidthOnConsole)
     EXPECT_EQ(2, getWidthOnConsole(str));
   }
   {
+    // A grapheme cluster of multiple code points.
     std::string str("\u1100\u1161\u11A8");
     EXPECT_EQ(2, getWidthOnConsole(str));
   }
