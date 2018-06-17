@@ -1,8 +1,11 @@
 #if !defined(ENEK_FEATURE_TEMPLATE_PARSING_LINE_ITERATOR_HPP_INCLUDE_GUARD)
 #define ENEK_FEATURE_TEMPLATE_PARSING_LINE_ITERATOR_HPP_INCLUDE_GUARD
 
+#include <enek/unicode/utf8.hpp>
 #include <enek/util/assert.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <boost/range/end.hpp>
+#include <boost/range/begin.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_categories.hpp>
@@ -122,7 +125,7 @@ public:
 private:
   friend class boost::iterator_core_access;
 
-  reference dereference() const noexcept(noexcept(This_::base_))
+  reference dereference() const noexcept(noexcept(*This_::base_))
   {
     return *this->base_;
   }
@@ -141,9 +144,7 @@ private:
       switch (ref) {
       case '\r':
         new_line = true;
-        if (prev_ != '\n') {
-          ++line_number_;
-        }
+        ++line_number_;
         break;
       case '\n':
         new_line = true;
@@ -176,26 +177,29 @@ public:
 
   std::size_t getLineNumber() const noexcept
   {
+    ENEK_ASSERT(this->hasTextPosition());
     return line_number_;
   }
 
   std::size_t getColumnNumber() const
   {
-    std::size_t column_number = 0;
-    for (Iterator iter = line_first_;
-         iter != this->base_;
-         ++iter, ++column_number);
-    return column_number;
+    ENEK_ASSERT(this->hasTextPosition());
+    return Enek::Unicode::UTF8::getWidthOnConsole(line_first_, this->base_);
   }
 
   BaseIterator getLineFirstPosition() const
   {
+    ENEK_ASSERT(this->hasTextPosition());
     return line_first_;
   }
 
   BaseIterator getLineLastPosition(BaseIterator const &upper_bound) const
   {
-    for (Iterator iter = this->base_; iter != upper_bound; ++iter) {
+    Iterator iter = this->base_;
+    if (*this->base_ == '\n' && prev_ == '\r') {
+      ++iter;
+    }
+    for (; iter != upper_bound; ++iter) {
       if ((*iter == '\r') || (*iter == '\n')) {
         return iter;
       }
@@ -209,6 +213,19 @@ private:
   Iterator line_first_;
   value_type prev_;
 }; // class TextPositionIterator
+
+template<typename ForwardIterator>
+auto makeTextPositionIteratorRange(ForwardIterator first, ForwardIterator last)
+{
+  using Iterator = TextPositionIterator<ForwardIterator>;
+  return Iterator::makeIteratorRange(std::move(first), std::move(last));
+}
+
+template<typename ForwardRange>
+auto makeTextPositionIteratorRange(ForwardRange &r)
+{
+  return makeTextPositionIteratorRange(boost::begin(r), boost::end(r));
+}
 
 } // namespace Enek::FeatureTemplate::Parsing
 
