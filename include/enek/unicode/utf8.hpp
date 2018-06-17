@@ -23,6 +23,15 @@ public:
 
 void appendCodePoint(std::string &s, char32_t c);
 
+std::size_t getWidthOnConsole(std::string const &str);
+
+template<typename Iterator>
+std::size_t getWidthOnConsole(Iterator first, Iterator last)
+{
+  std::string str(first, last);
+  return getWidthOnConsole(str);
+}
+
 } // namespace Enek::Unicode::UTF8
 
 #endif // !defined(ENEK_UNICODE_UTF8_HPP_INCLUDE_GUARD)
