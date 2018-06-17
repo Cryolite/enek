@@ -54,6 +54,13 @@ TEST(UnicodeCharTest, testFormatAsCodePoint)
     oss << formatAsCodePoint(str.cbegin(), str.cend());
     EXPECT_STREQ("U+1100 U+1161 U+11A8", oss.str().c_str());
   }
+  {
+    std::ostringstream oss;
+    char32_t c = U'\u0020';
+    oss << U'\u0020' << ' ' << formatAsCodePoint(&c, &c) << ' '
+        << U'\u0020';
+    EXPECT_STREQ("32  32", oss.str().c_str());
+  }
 }
 
 TEST(UnicodeCharTest, testIsOtherSurrogate)
