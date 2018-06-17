@@ -81,6 +81,7 @@
                            (split-window-horizontally-n 3)))
 
 (setq compile-command "/work/enek/bin/test --build-dir=/work/enek-build/debug -j auto --debug && /work/enek/bin/test --build-dir=/work/enek-build/release -j auto --release")
+(setq compilation-scroll-output 'first-error)
 (global-set-key [f1] 'compile)
 (global-set-key [f2] 'previous-error)
 (global-set-key [f3] 'next-error)
