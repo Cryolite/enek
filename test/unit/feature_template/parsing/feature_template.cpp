@@ -1,59 +1,6 @@
-#include <enek/feature_template/parsing/parse.hpp>
+#include "common.hpp"
 #include <gtest/gtest.h>
 
-
-namespace{
-
-void testParse(
-  std::string const &to_be_parsed,
-  std::string const &dump_to_be_expected,
-  std::string const &error_message_to_be_expected)
-{
-  namespace Parsing = Enek::FeatureTemplate::Parsing;
-  std::ostringstream error_oss;
-  Parsing::AST ast = Parsing::parse(to_be_parsed, error_oss);
-  if (ast.succeed()) {
-    std::ostringstream dump_oss;
-    ast.dumpXML(dump_oss);
-    ASSERT_STREQ(dump_oss.str().c_str(), dump_to_be_expected.c_str())
-      << "text: " << to_be_parsed;
-  }
-  else {
-    ASSERT_STREQ("", dump_to_be_expected.c_str());
-  }
-  ASSERT_STREQ(error_oss.str().c_str(), error_message_to_be_expected.c_str());
-}
-
-} // namespace *unnamed*
-
-TEST(FeatureTemplateTest, acceptIntegerLiteral)
-{
-  testParse("0",
-            "<feature_template><integer_literal>0</integer_literal></feature_template>",
-            "");
-  testParse("1",
-            "<feature_template><integer_literal>1</integer_literal></feature_template>",
-            "");
-  testParse("-1",
-            "<feature_template><integer_literal>-1</integer_literal></feature_template>",
-            "");
-  testParse("9223372036854775807",
-            "<feature_template><integer_literal>9223372036854775807</integer_literal></feature_template>",
-            "");
-  testParse("9223372036854775808",
-            "",
-            "1:1: error: An integer literal is too large. It should be within the range [-9223372036854775808, 9223372036854775807].\n"
-            "9223372036854775808\n"
-            "^^^^^^^^^^^^^^^^^^^\n");
-  testParse("-9223372036854775808",
-            "<feature_template><integer_literal>-9223372036854775808</integer_literal></feature_template>",
-            "");
-  testParse("-9223372036854775809",
-            "",
-            "1:1: error: An integer literal is too large. It should be within the range [-9223372036854775808, 9223372036854775807].\n"
-            "-9223372036854775809\n"
-            "^^^^^^^^^^^^^^^^^^^^\n");
-}
 
 TEST(FeatureTemplateTest, acceptFloatingLiteral)
 {

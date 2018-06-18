@@ -37,18 +37,25 @@ private:
   using This_ = TextPositionIterator;
 
 public:
-  static std::pair<TextPositionIterator, TextPositionIterator>
-  makeIteratorRange(Iterator const &first, Iterator const &last)
-  {
-    TextPositionIterator first_(first, std::false_type());
-    TextPositionIterator last_(last, std::true_type());
-    return std::make_pair(std::move(first_), std::move(last_));
-  }
-
-public:
   using BaseIterator = Iterator;
   using typename Facade_::value_type;
   using typename Facade_::reference;
+
+  static boost::iterator_range<TextPositionIterator>
+  makeIteratorRange(BaseIterator const &first, BaseIterator const &last)
+  {
+    return boost::iterator_range<TextPositionIterator>(
+      TextPositionIterator(first, std::false_type()),
+      TextPositionIterator(last, std::true_type()));
+  }
+
+  static boost::iterator_range<TextPositionIterator>
+  makeIteratorRange(boost::iterator_range<BaseIterator> const &r)
+  {
+    return boost::iterator_range<TextPositionIterator>(
+      TextPositionIterator(boost::begin(r), std::false_type()),
+      TextPositionIterator(boost::end(r), std::true_type()));
+  }
 
 private:
   static constexpr std::size_t
