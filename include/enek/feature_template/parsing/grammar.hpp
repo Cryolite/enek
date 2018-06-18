@@ -2,16 +2,19 @@
 #define ENEK_FEATURE_TEMPLATE_PARSING_GRAMMAR_HPP_INCLUDE_GUARD
 
 #include <enek/feature_template/parsing/ast.hpp>
+#include <enek/feature_template/parsing/string_literal.hpp>
+#include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <enek/feature_template/parsing/floating_literal.hpp>
 #include <enek/feature_template/parsing/integer_literal.hpp>
-#include <enek/feature_template/parsing/boolean_literal.hpp>
-#include <enek/feature_template/parsing/string_literal.hpp>
+#include <enek/feature_template/input_type.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/bind/bind_function.hpp>
 #include <boost/phoenix/core/reference.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <filesystem>
 #include <ostream>
+#include <utility>
 
 
 namespace Enek::FeatureTemplate::Parsing{
@@ -73,13 +76,10 @@ private:
   using IteratorRange = boost::iterator_range<Iterator>;
 
 private:
-  static void initializeIntegerLiteral(IntegerLiteral &self,
-                                       IteratorRange const &parse_range,
-                                       Path const &path,
-                                       BaseIteratorRange const &text_range,
-                                       std::ostream &os)
+  void initializeIntegerLiteral(IntegerLiteral &self,
+                                IteratorRange const &parse_range)
   {
-    self.initialize(parse_range, path, text_range, os);
+    self.initialize(parse_range, path_, text_range_, os_);
   }
 
   static void moveAssignIntegerLiteral(IntegerLiteral &from, AST &to)
@@ -123,10 +123,12 @@ private:
   }
 
 public:
-  Grammar(Path const &path,
+  Grammar(Enek::FeatureTemplate::InputType input_type,
+          Path const &path,
           BaseIteratorRange const &text_range,
           std::ostream &os)
     : Grammar::base_type(feature_template_, "feature_template")
+    , input_type_(input_type)
     , path_(path)
     , text_range_(text_range)
     , os_(os)
@@ -154,7 +156,7 @@ public:
       ;*/
     integer_literal_
       = qi::raw[qi::lexeme[-qi::lit('-') >> ('0' | ((qi::digit - '0') >> *qi::digit))]]
-      [phx::bind(&initializeIntegerLiteral, qi::_val, qi::_1, phx::ref(path_), phx::ref(text_range_), phx::ref(os_))]
+      [phx::bind(&Grammar::initializeIntegerLiteral, this, qi::_val, qi::_1)]
       ;
     floating_literal_
       = qi::raw[qi::lexeme[
@@ -278,6 +280,7 @@ private:
   using Rule = boost::spirit::qi::rule<Iterator, Attribute()>;
 
 private:
+  Enek::FeatureTemplate::InputType input_type_;
   Path const &path_;
   BaseIteratorRange const &text_range_;
   std::ostream &os_;

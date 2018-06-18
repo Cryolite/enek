@@ -1,11 +1,17 @@
 #include <enek/feature_template/parsing/integer_literal.hpp>
-
+#include <enek/feature_template/parsing/print_message.hpp>
+#include <enek/feature_template/parsing/text_position_iterator.hpp>
 #include <enek/util/throw.hpp>
 #include <enek/util/assert.hpp>
+#include <boost/range/iterator_range.hpp>
+#include <boost/range/end.hpp>
+#include <boost/range/begin.hpp>
 #include <ostream>
-#include <utility>
+#include <string>
+#include <type_traits>
 #include <stdexcept>
 #include <cstdint>
+#include <limits>
 
 
 namespace Enek::FeatureTemplate::Parsing{
@@ -28,15 +34,125 @@ bool IntegerLiteral::isInitialized() const noexcept
   return initialized_;
 }
 
-bool IntegerLiteral::succeed() const noexcept
+template<typename Iterator, typename BaseIterator>
+void IntegerLiteral::initialize(
+  boost::iterator_range<Iterator> const &parse_range,
+  Path const &path,
+  boost::iterator_range<BaseIterator> const &text_range,
+  std::ostream &os)
 {
-  ENEK_ASSERT(this->isInitialized());
+  static_assert(
+    std::is_same<typename Iterator::BaseIterator, BaseIterator>::value);
+  if (this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "Try to initialize an already initialized object.");
+  }
+  ENEK_ASSERT(!error_);
+  ENEK_ASSERT(value_ == 0);
+  ENEK_ASSERT(boost::begin(parse_range) != boost::end(parse_range));
+  Iterator iter = boost::begin(parse_range);
+  if (!iter.hasTextPosition()) {
+    ENEK_THROW<std::invalid_argument>(
+      "The argument `parse_range' does not have any text position.");
+  }
+  Iterator const parse_last = boost::end(parse_range);
+
+  enum class ErrorKind
+  {
+    too_large,
+    too_small
+  } error_kind;
+
+  if (*iter != '-') {
+    for (; iter != parse_last; ++iter) {
+      ENEK_ASSERT('0' <= *iter);
+      ENEK_ASSERT(*iter <= '9');
+      char const value = *iter - '0';
+      if (value_ > std::numeric_limits<std::int_fast64_t>::max() / 10) {
+        initialized_ = true;
+        error_ = true;
+        value_ = 0;
+        error_kind = ErrorKind::too_large;
+        break;
+      }
+      value_ *= 10;
+      if (value_ > std::numeric_limits<std::int_fast64_t>::max() - value) {
+        initialized_ = true;
+        error_ = true;
+        value_ = 0;
+        error_kind = ErrorKind::too_large;
+        break;
+      }
+      value_ += value;
+    }
+  }
+  else {
+    ++iter;
+    for (; iter != parse_last; ++iter) {
+      ENEK_ASSERT('0' <= *iter);
+      ENEK_ASSERT(*iter <= '9');
+      char const value = *iter - '0';
+      if (value_ < std::numeric_limits<std::int_fast64_t>::min() / 10) {
+        initialized_ = true;
+        error_ = true;
+        value_ = 0;
+        error_kind = ErrorKind::too_small;
+        break;
+      }
+      value_ *= 10;
+      if (value_ < std::numeric_limits<std::int_fast64_t>::min() + value) {
+        initialized_ = true;
+        error_ = true;
+        value_ = 0;
+        error_kind = ErrorKind::too_small;
+        break;
+      }
+      value_ -= value;
+    }
+  }
+  initialized_ = true;
+  if (error_) {
+    if (error_kind == ErrorKind::too_large) {
+      Enek::FeatureTemplate::Parsing::makeMessagePrinter(
+        path, text_range, parse_range, os)
+        << "error: An integer literal is too large.";
+    }
+    else {
+      Enek::FeatureTemplate::Parsing::makeMessagePrinter(
+        path, text_range, parse_range, os)
+        << "error: An integer literal is too small.";
+    }
+  }
+}
+
+#define ENEK_INSTANTIATE(...)                                                                  \
+  template                                                                                     \
+  void IntegerLiteral::initialize<                                                             \
+    Enek::FeatureTemplate::Parsing::TextPositionIterator<__VA_ARGS__>,                         \
+    __VA_ARGS__>(                                                                              \
+      boost::iterator_range<                                                                   \
+        Enek::FeatureTemplate::Parsing::TextPositionIterator<__VA_ARGS__>> const &parse_range, \
+      Path const &path,                                                                        \
+      boost::iterator_range<__VA_ARGS__> const &text_range,                                    \
+      std::ostream &os)
+
+ENEK_INSTANTIATE(std::string::const_iterator);
+
+bool IntegerLiteral::succeed() const
+{
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`succeed' is called on an uninitialized object.");
+  }
   return !error_;
 }
 
-std::int_fast64_t IntegerLiteral::getValue() const noexcept
+std::int_fast64_t IntegerLiteral::getValue() const
 {
-  ENEK_ASSERT(this->isInitialized());
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is called on an uninitialized object.");
+  }
   return value_;
 }
 
@@ -44,9 +160,14 @@ void IntegerLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
     ENEK_THROW<std::invalid_argument>(
-      "error: `dumpXML' is called on an uninitialized `IntegerLiteral'.");
+      "`dumpXML' is called on an uninitialized object.");
   }
-  os << "<integer_literal>" << value_ << "</integer_literal>";
+  if (!error_) {
+    os << "<integer_literal>" << value_ << "</integer_literal>";
+  }
+  else {
+    os << "<integer_literal succeed=\"false\"/>";
+  }
 }
 
 } // namespace Enek::FeatureTemplate::Parsing

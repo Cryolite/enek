@@ -3,6 +3,7 @@
 #include <enek/feature_template/parsing/grammar.hpp>
 #include <enek/feature_template/parsing/ast.hpp>
 #include <enek/feature_template/parsing/text_position_iterator.hpp>
+#include <enek/feature_template/input_type.hpp>
 #include <boost/spirit/include/qi_parse.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/end.hpp>
@@ -18,7 +19,10 @@ namespace Enek::FeatureTemplate::Parsing{
 using Path = std::filesystem::path;
 
 Enek::FeatureTemplate::Parsing::AST
-parse(Path const &path, std::string const &text, std::ostream &os)
+parse(Enek::FeatureTemplate::InputType input_type,
+      Path const &path,
+      std::string const &text,
+      std::ostream &os)
 {
   namespace qi = boost::spirit::qi;
   namespace Parsing = Enek::FeatureTemplate::Parsing;
@@ -30,7 +34,7 @@ parse(Path const &path, std::string const &text, std::ostream &os)
   IteratorRange parse_range = Iterator::makeIteratorRange(text_range);
   Iterator first = boost::begin(parse_range);
   Iterator last = boost::end(parse_range);
-  Parsing::Grammar<Iterator> grammar(path, text_range, os);
+  Parsing::Grammar<Iterator> grammar(input_type, path, text_range, os);
   Parsing::SkipGrammar<Iterator> skip_grammar;
   Parsing::AST ast;
   qi::phrase_parse(first, std::move(last), grammar, skip_grammar, ast);
@@ -38,9 +42,11 @@ parse(Path const &path, std::string const &text, std::ostream &os)
 }
 
 Enek::FeatureTemplate::Parsing::AST
-parse(std::string const &text, std::ostream &os)
+parse(Enek::FeatureTemplate::InputType input_type,
+      std::string const &text,
+      std::ostream &os)
 {
-  return Enek::FeatureTemplate::Parsing::parse(Path(), text, os);
+  return Enek::FeatureTemplate::Parsing::parse(input_type, Path(), text, os);
 }
 
 } // namespace Enek::FeatureTemplate::Parsing
