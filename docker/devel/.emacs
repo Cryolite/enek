@@ -3,11 +3,12 @@
 ; Misc
 ;=======================================================================
 (global-font-lock-mode t)
+(setq line-number-mode t)
 (setq column-number-mode t)
 (auto-compression-mode t)
 ;(global-set-key "\C-z" 'undo)
 (setq frame-title-format (concat "%b - emacs@" system-name))
-;(setq make-backup-files nil)
+(setq make-backup-files nil)
 (setq kill-whole-line t)
 (when (boundp 'show-trailing-whitespace) (setq-default show-trailing-whitespace t))
 (recentf-mode)
@@ -79,7 +80,8 @@
                            (interactive)
                            (split-window-horizontally-n 3)))
 
-(setq compile-command "/work/enek/bin/test --build-dir=/work/enek-build -j auto --debug")
+(setq compile-command "/work/enek/bin/test --build-dir=/work/enek-build/debug -j auto --debug && /work/enek/bin/test --build-dir=/work/enek-build/release -j auto --release")
+(setq compilation-scroll-output 'first-error)
 (global-set-key [f1] 'compile)
 (global-set-key [f2] 'previous-error)
 (global-set-key [f3] 'next-error)

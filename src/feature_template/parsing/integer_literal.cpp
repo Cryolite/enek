@@ -43,8 +43,8 @@ std::int_fast64_t IntegerLiteral::getValue() const noexcept
 void IntegerLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
-    ENEK_THROW(std::invalid_argument)
-      << "error: `dumpXML' is called on an uninitialized `IntegerLiteral'.";
+    ENEK_THROW<std::invalid_argument>(
+      "error: `dumpXML' is called on an uninitialized `IntegerLiteral'.");
   }
   os << "<integer_literal>" << value_ << "</integer_literal>";
 }

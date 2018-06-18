@@ -72,8 +72,8 @@ std::string const &StringLiteral::getValue() const noexcept
 void StringLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
-    ENEK_THROW(std::invalid_argument)
-      << "`dumpXML' is called on an uninitialized `StringLiteral'.";
+    ENEK_THROW<std::invalid_argument>(
+      "`dumpXML' is called on an uninitialized `StringLiteral'.");
   }
   os << "<string_literal>" << value_ << "</string_literal>";
 }

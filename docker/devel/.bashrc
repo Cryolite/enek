@@ -82,9 +82,37 @@ alias mv='mv -iv'
 alias cp='cp -iv'
 alias diffy='diff -y -W $COLUMNS'
 
-# Add an "alert" alias for long running commands.  Use like so:
+# Add an "alert" function for long running commands.  Use like so:
 #   sleep 10; alert
-#alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+function alert ()
+{
+    local exval=$?
+    local command="$(history | tail -n 1 | sed -e 's/^\s*[0-9]\+\s*//;s/^[0-9]\+-[0-9]\+-[0-9]\+_[0-9]\+:[0-9]\+:[0-9]\+\\\s\+//;s/[;&|]\s*alert\s*$//')"
+    echo -en '\a'
+    if test $exval -eq 0; then
+        local message="alert: Command terminated normally.: $command"
+        if test -t 1 && tput setaf 1 &>/dev/null; then
+            if test "$(tput colors)" -eq 256; then
+                echo -E "$(tput setaf 10)$message$(tput sgr0)"
+            else
+                echo -E "$(tput setaf 2)$message$(tput sgr0)"
+            fi
+        else
+            echo -E "$message"
+        fi
+    else
+        local message="alert: Command terminated abnormally with exit code \`$exval'.: $command"
+        if test -t 1 && tput setaf 1 &>/dev/null; then
+            if test "$(tput colors)" -eq 256; then
+                echo -E "$(tput setaf 9)$message$(tput sgr0)"
+            else
+                echo -E "$(tput setaf 1)$message$(tput sgr0)"
+            fi
+        else
+            echo -E "$message"
+        fi
+    fi
+}
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
@@ -95,7 +123,7 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-lsless ()
+function lsless ()
 {
     if [ ! -t 1 ]; then
         echo "error: not a tty" >&2
@@ -104,7 +132,7 @@ lsless ()
     ls --color=always "$@" | less -R
 }
 
-llless ()
+function llless ()
 {
     if [ ! -t 1 ]; then
         echo "error: not a tty" >&2
@@ -113,7 +141,7 @@ llless ()
     ll --color=always "$@" | less -R
 }
 
-llaless ()
+function llaless ()
 {
     if [ ! -t 1 ]; then
         echo "error: not a tty" >&2
@@ -122,7 +150,7 @@ llaless ()
     lla --color=always "$@" | less -R
 }
 
-diffyless ()
+function diffyless ()
 {
     if [ ! -t 1 ]; then
         echo "error: not a tty" >&2
@@ -131,7 +159,7 @@ diffyless ()
     diffy "$@" | less
 }
 
-reatach ()
+function reatach ()
 {
     "$HOME/.screen/reatach.sh" "$@"
 }

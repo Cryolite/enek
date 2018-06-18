@@ -1,4 +1,5 @@
 add_library(unicode
+  icu_error.cpp
   char.cpp
   utf8.cpp)
 target_include_directories(unicode

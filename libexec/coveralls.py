@@ -119,23 +119,25 @@ def report(job):
 def parseArgs(argv):
     parser = argparse.ArgumentParser('coveralls.py')
     parser.add_argument('--source-root', metavar='DIR', required=True,
-                        help='the root directory of the source tree')
+                        help='The root directory of the source tree.')
     parser.add_argument('--build-root', metavar='DIR', required=True,
-                        help='the root directory of the build tree')
+                        help='The root directory of the build tree.')
     parser.add_argument('--with-gcov', metavar='FILE', default='gcov',
-                        help='the command or path to gcov executable')
+                        help='The command or path to gcov executable.')
     parser.add_argument('--clear', action='store_true',
-                        help='clear all .gcov files in the build tree before execution')
+                        help='Clear all .gcov files in the build tree before execution.')
     parser.add_argument('--repo-token', metavar='TOKEN',
-                        help='repo_token for the repository')
+                        help='`repo_token\' for the repository.')
     parser.add_argument('--service-name', metavar='STRING',
-                        help='the CI service or other environment in which the test suite was run')
+                        help='The CI service or other environment in which the test suite was run.')
     parser.add_argument('--service-number', metavar='STRING',
-                        help='the build number')
+                        help='The build number.')
     parser.add_argument('--service-job-id', metavar='STRING',
-                        help='a unique identifier of the job on the service specified by `--service-name\'')
+                        help='A unique identifier of the job on the service specified by `--service-name\'.')
     parser.add_argument('--service-pull-request', metavar='STRING',
-                        help='the associated pull request ID of the build')
+                        help='The associated pull request ID of the build.')
+    parser.add_argument('--dump-json', action='store_true',
+                        help='Dump the result in JSON format.')
     param = parser.parse_args(argv[1:])
 
     if not os.path.isdir(param.source_root):
@@ -151,6 +153,31 @@ def parseArgs(argv):
     param.build_root = os.path.realpath(param.build_root)
 
     return param
+
+def exclude(source_root, source_files):
+    for source_file in source_files:
+        path = source_file['name']
+        coverage = source_file['coverage']
+        abs_path = os.path.join(source_root, path)
+        with open(abs_path) as f:
+            excl = False
+            for i, line in enumerate(f):
+                line = line.rstrip('\n')
+                if i >= len(coverage):
+                    break
+                if line.find('LCOV_EXCL_LINE') != -1:
+                    coverage[i] = None
+                    continue
+                if line.find('LCOV_EXCL_START') != -1:
+                    excl = True
+                if line.find('LCOV_EXCL_STOP') != -1:
+                    excl = False
+                if coverage[i] is None:
+                    continue
+                if excl:
+                    print(line)
+                    coverage[i] = None
+                    continue
 
 def main(argv):
     param = parseArgs(argv)
@@ -191,6 +218,7 @@ def main(argv):
             'coverage': coverage['coverage'],
             #'branches': sorted_branches,
         })
+    exclude(param.source_root, source_files)
 
     job = {}
     if param.repo_token is not None:
@@ -204,6 +232,9 @@ def main(argv):
     if param.service_pull_request is not None:
         job['service_pull_request'] = param.service_pull_request
     job['source_files'] = source_files
+    if param.dump_json:
+        print(json.dumps(job))
+        sys.exit(0)
     report(job)
     return 0
 

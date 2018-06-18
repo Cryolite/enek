@@ -25,8 +25,8 @@ public:
 
   bool operator()(UninitializedASTNode const &) const
   {
-    ENEK_THROW(std::logic_error)
-      << "error: `isInitialized' is called on `UninitializedASTNode'.";
+    ENEK_THROW<std::logic_error>(
+      "error: `isInitialized' is called on `UninitializedASTNode'.");
     return false;
   }
 
@@ -51,8 +51,8 @@ public:
 
   bool operator()(UninitializedASTNode const &) const
   {
-    ENEK_THROW(std::logic_error)
-      << "error: `succeed' is called on `UninitializedASTNode'.";
+    ENEK_THROW<std::logic_error>(
+      "error: `succeed' is called on `UninitializedASTNode'.");
     return false;
   }
 
@@ -78,8 +78,8 @@ public:
 
   void operator()(UninitializedASTNode const &)
   {
-    ENEK_THROW(std::logic_error)
-      << "error: `dumpXML' is called on `UninitializedASTNode'.";
+    ENEK_THROW<std::logic_error>(
+      "error: `dumpXML' is called on `UninitializedASTNode'.");
   }
 
   template<typename ASTNode>
@@ -150,8 +150,8 @@ bool AST::succeed() const noexcept
 void AST::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
-    ENEK_THROW(std::invalid_argument)
-      << "error: `dumpXML' is called on an uninitialized `AST'.";
+    ENEK_THROW<std::invalid_argument>(
+      "error: `dumpXML' is called on an uninitialized `AST'.");
   }
   os << "<feature_template>";
   Enek::FeatureTemplate::Parsing::dumpXML(root_node_, os);

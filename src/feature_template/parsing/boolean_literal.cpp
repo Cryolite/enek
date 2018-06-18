@@ -64,8 +64,8 @@ bool BooleanLiteral::getValue() const noexcept
 void BooleanLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
-    ENEK_THROW(std::invalid_argument)
-      << "`dumpXML' is called on an uninitialized `BooleanLiteral'.";
+    ENEK_THROW<std::invalid_argument>(
+      "`dumpXML' is called on an uninitialized `BooleanLiteral'.");
   }
   boost::io::ios_flags_saver saver(os);
   os << "<boolean_literal>" << std::boolalpha << value_
