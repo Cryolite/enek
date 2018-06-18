@@ -15,10 +15,11 @@ void testParse(
   std::ostringstream error_oss;
   Parsing::AST ast = Parsing::parse(
     Enek::FeatureTemplate::InputType::word, text_to_be_parsed, error_oss);
+  EXPECT_EQ(ast.succeed(), error_oss.str().empty());
   std::ostringstream dump_oss;
   ast.dumpXML(dump_oss);
-  ASSERT_STREQ(dump_oss.str().c_str(), dump_to_be_expected.c_str())
+  EXPECT_STREQ(dump_oss.str().c_str(), dump_to_be_expected.c_str())
     << "parsed text: " << text_to_be_parsed;
-  ASSERT_STREQ(error_oss.str().c_str(), error_message_to_be_expected.c_str())
+  EXPECT_STREQ(error_oss.str().c_str(), error_message_to_be_expected.c_str())
     << "parsed text: " << text_to_be_parsed;
 }

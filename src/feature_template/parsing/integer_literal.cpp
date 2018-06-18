@@ -163,7 +163,7 @@ void IntegerLiteral::dumpXML(std::ostream &os) const
       "`dumpXML' is called on an uninitialized object.");
   }
   if (!error_) {
-    os << "<integer_literal>" << value_ << "</integer_literal>";
+    os << "<integer_literal>" << this->getValue() << "</integer_literal>";
   }
   else {
     os << "<integer_literal succeed=\"false\"/>";
