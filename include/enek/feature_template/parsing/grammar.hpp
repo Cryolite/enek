@@ -6,7 +6,7 @@
 #include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <enek/feature_template/parsing/floating_literal.hpp>
 #include <enek/feature_template/parsing/integer_literal.hpp>
-#include <enek/feature_template/input_type.hpp>
+#include <enek/feature_template/parsing/input_type.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/bind/bind_function.hpp>
@@ -123,7 +123,7 @@ private:
   }
 
 public:
-  Grammar(Enek::FeatureTemplate::InputType input_type,
+  Grammar(Enek::FeatureTemplate::Parsing::InputType input_type,
           Path const &path,
           BaseIteratorRange const &text_range,
           std::ostream &os)
@@ -280,7 +280,7 @@ private:
   using Rule = boost::spirit::qi::rule<Iterator, Attribute()>;
 
 private:
-  Enek::FeatureTemplate::InputType input_type_;
+  Enek::FeatureTemplate::Parsing::InputType input_type_;
   Path const &path_;
   BaseIteratorRange const &text_range_;
   std::ostream &os_;

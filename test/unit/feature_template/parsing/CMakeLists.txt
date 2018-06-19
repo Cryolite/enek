@@ -6,7 +6,7 @@ add_executable(test_unit_feature_template_parsing
 target_include_directories(test_unit_feature_template_parsing
   PRIVATE .)
 target_link_libraries(test_unit_feature_template_parsing
-  PRIVATE feature_template
+  PRIVATE feature_template_parsing
   PRIVATE unicode
   PRIVATE gtest_main
   PRIVATE stdc++fs

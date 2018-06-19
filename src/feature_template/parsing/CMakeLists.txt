@@ -1,4 +1,5 @@
 add_library(feature_template_parsing
+  input_type.cpp
   integer_literal.cpp
   floating_literal.cpp
   boolean_literal.cpp
