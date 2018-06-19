@@ -26,16 +26,16 @@ public:
 
   IsInitializedASTVisitor &operator=(IsInitializedASTVisitor const &) = delete;
 
+  // LCOV_EXCL_START
   bool operator()(UninitializedASTNode const &node) const noexcept
   {
     using std::placeholders::_1;
-    // LCOV_EXCL_START
     ENEK_THROW<std::logic_error>(_1)
       << "`isInitialized' is called on an object of type `"
       << Enek::getTypeName(node) << "'.";
     return false;
-    // LCOV_EXCL_STOP
   }
+  // LCOV_EXCL_STOP
 
   template<typename ASTNode>
   bool operator()(ASTNode const &node) const noexcept
@@ -59,6 +59,7 @@ public:
 
   SucceedASTVisitor &operator=(SucceedASTVisitor const &) = delete;
 
+  // LCOV_EXCL_START
   bool operator()(UninitializedASTNode const &node) const
   {
     using std::placeholders::_1;
@@ -67,6 +68,7 @@ public:
       << Enek::getTypeName(node) << "'.";
     return false;
   }
+  // LCOV_EXCL_STOP
 
   template<typename ASTNode>
   bool operator()(ASTNode const &node) const
@@ -90,6 +92,7 @@ public:
 
   GetTypeASTVisitor &operator=(GetTypeASTVisitor const &) = delete;
 
+  // LCOV_EXCL_START
   Enek::FeatureTemplate::Type operator()(
     UninitializedASTNode const &node) const
   {
@@ -99,6 +102,7 @@ public:
       << Enek::getTypeName(node) << "'.";
     return Enek::FeatureTemplate::Type::unknown;
   }
+  // LCOV_EXCL_STOP
 
   template<typename ASTNode>
   Enek::FeatureTemplate::Type operator()(ASTNode const &node) const
@@ -124,11 +128,13 @@ public:
 
   DumpXMLASTVisitor &operator=(DumpXMLASTVisitor const &) = delete;
 
+  // LCOV_EXCL_START
   void operator()(UninitializedASTNode const &)
   {
     ENEK_THROW<std::logic_error>(
       "error: `dumpXML' is called on `UninitializedASTNode'.");
   }
+  // LCOV_EXCL_STOP
 
   template<typename ASTNode>
   void operator()(ASTNode const &node)
@@ -172,10 +178,16 @@ template<typename ASTNode>
 void AST::moveAssign(ASTNode &&root_node)
 {
   static_assert(!std::is_reference<ASTNode>::value);
-  ENEK_ASSERT(Enek::FeatureTemplate::Parsing::isInitialized(root_node))
-    << "info: The type of `root_node' is `" << Enek::getTypeName(root_node)
-    << "'." << std::endl;
-  ENEK_ASSERT(!this->isInitialized());
+  using std::placeholders::_1;
+  if (this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "Try to initialize an already initialized object.");
+  }
+  if (!Enek::FeatureTemplate::Parsing::isInitialized(root_node)) {
+    ENEK_THROW<std::invalid_argument>(_1)
+      << "Try to initialize with an uninitialized object of type `"
+      << Enek::getTypeName(root_node) << "'.";
+  }
   root_node_.emplace<ASTNode>(std::move(root_node));
 }
 
