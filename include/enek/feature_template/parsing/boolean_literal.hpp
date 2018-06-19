@@ -7,6 +7,9 @@
 
 namespace Enek::FeatureTemplate::Parsing{
 
+template<typename Iterator>
+class Grammar;
+
 class BooleanLiteral
 {
 public:
@@ -18,8 +21,13 @@ public:
 
   bool isInitialized() const noexcept;
 
+private:
+  template<typename Iterator>
+  friend class Grammar;
+
   void initialize(bool value);
 
+public:
   bool succeed() const;
 
   Enek::FeatureTemplate::Type getType() const;

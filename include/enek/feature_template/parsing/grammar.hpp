@@ -108,13 +108,10 @@ private:
     to.moveAssign(std::move(from));
   }
 
-  static void initializeStringLiteral(StringLiteral &self,
-                                      IteratorRange const &parse_range,
-                                      Path const &path,
-                                      BaseIteratorRange const &text_range,
-                                      std::ostream &os) noexcept
+  void initializeStringLiteral(StringLiteral &self,
+                               IteratorRange const &parse_range)
   {
-    self.initialize(parse_range, path, text_range, os);
+    self.initialize(parse_range, path_, text_range_, os_);
   }
 
   static void moveAssignStringLiteral(StringLiteral &from, AST &to)
@@ -182,7 +179,7 @@ public:
       ;
     string_literal_
       = qi::raw[qi::lexeme['"' >> *s_char_ >> '"']]
-      [phx::bind(&initializeStringLiteral, qi::_val, qi::_1, phx::ref(path_), phx::ref(text_range_), phx::ref(os_))]
+        [phx::bind(&Grammar::initializeStringLiteral, this, qi::_val, qi::_1)]
       ;
     primary_feature_template_
       // `floating_literal_' should be placed prior to `integer_literal_' since
