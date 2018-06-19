@@ -19,12 +19,12 @@ Enek::FeatureTemplate::Parsing::AST testParse(
     error_oss);
   EXPECT_EQ(ast.succeed(), error_oss.str().empty());
   EXPECT_STREQ(error_oss.str().c_str(), error_message_to_be_expected.c_str())
-    << "parsed text: " << text_to_be_parsed;
+    << "parsed text: " << text_to_be_parsed; // LCOV_EXCL_LINE
   {
     std::ostringstream dump_oss;
     ast.dumpXML(dump_oss);
     EXPECT_STREQ(dump_oss.str().c_str(), dump_to_be_expected.c_str())
-      << "parsed text: " << text_to_be_parsed;
+      << "parsed text: " << text_to_be_parsed; // LCOV_EXCL_LINE
   }
   return ast;
 }

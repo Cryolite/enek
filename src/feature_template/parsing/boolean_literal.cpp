@@ -68,9 +68,14 @@ void BooleanLiteral::dumpXML(std::ostream &os) const
     ENEK_THROW<std::invalid_argument>(
       "`dumpXML' is called on an uninitialized object.");
   }
-  boost::io::ios_flags_saver saver(os);
-  os << "<boolean_literal>" << std::boolalpha << value_
-     << "</boolean_literal>";
+  if (this->succeed()) {
+    boost::io::ios_flags_saver saver(os);
+    os << "<boolean_literal>" << std::boolalpha << this->getValue()
+       << "</boolean_literal>";
+  }
+  else {
+    os << "<boolean_literal succeed=\"false\"/>";
+  }
 }
 
 } // namespace Enek::FeatureTemplate::Parsing

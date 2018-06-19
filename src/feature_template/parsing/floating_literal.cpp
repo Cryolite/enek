@@ -60,7 +60,12 @@ void FloatingLiteral::dumpXML(std::ostream &os) const
     ENEK_THROW<std::invalid_argument>(
       "`dumpXML' is called on an uninitialized object.");
   }
-  os << "<floating_literal>" << value_ << "</floating_literal>";
+  if (this->succeed()) {
+    os << "<floating_literal>" << this->getValue() << "</floating_literal>";
+  }
+  else {
+    os << "<floating_literal succeed=\"false\"/>";
+  }
 }
 
 } // namespace Enek::FeatureTemplate::Parsing

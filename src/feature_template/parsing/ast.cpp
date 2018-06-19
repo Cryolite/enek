@@ -29,10 +29,12 @@ public:
   bool operator()(UninitializedASTNode const &node) const noexcept
   {
     using std::placeholders::_1;
+    // LCOV_EXCL_START
     ENEK_THROW<std::logic_error>(_1)
       << "`isInitialized' is called on an object of type `"
       << Enek::getTypeName(node) << "'.";
     return false;
+    // LCOV_EXCL_STOP
   }
 
   template<typename ASTNode>
