@@ -1,10 +1,10 @@
 #if !defined(ENEK_FEATURE_TEMPLATE_PARSING_AST_HPP_INCLUDE_GUARD)
 #define ENEK_FEATURE_TEMPLATE_PARSING_AST_HPP_INCLUDE_GUARD
 
+#include <enek/feature_template/parsing/string_literal.hpp>
+#include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <enek/feature_template/parsing/floating_literal.hpp>
 #include <enek/feature_template/parsing/integer_literal.hpp>
-#include <enek/feature_template/parsing/boolean_literal.hpp>
-#include <enek/feature_template/parsing/string_literal.hpp>
 #include <ostream>
 #include <variant>
 
@@ -34,12 +34,16 @@ public:
 
   AST(AST &&rhs) noexcept;
 
+  AST &operator=(AST const &) = delete;
+
   bool isInitialized() const noexcept;
 
   template<typename ASTNode>
   void moveAssign(ASTNode &&root_node);
 
-  bool succeed() const noexcept;
+  bool succeed() const;
+
+  Enek::FeatureTemplate::Type getType() const;
 
   void dumpXML(std::ostream &os) const;
 

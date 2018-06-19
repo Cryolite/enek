@@ -1,5 +1,5 @@
 #include <enek/feature_template/parsing/string_literal.hpp>
-
+#include <enek/feature_template/type.hpp>
 #include <enek/util/throw.hpp>
 #include <enek/util/assert.hpp>
 #include <ostream>
@@ -30,42 +30,38 @@ StringLiteral::StringLiteral(StringLiteral &&rhs) noexcept
 
 bool StringLiteral::isInitialized() const noexcept
 {
+  ENEK_ASSERT(!error_ || initialized_);
   return initialized_;
 }
 
-bool StringLiteral::succeed() const noexcept
+bool StringLiteral::succeed() const
 {
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`succeed' is called on an uninitialized object.");
+  }
   return !error_;
 }
 
-void StringLiteral::swap(StringLiteral &rhs) noexcept
+Enek::FeatureTemplate::Type StringLiteral::getType() const
 {
-  using std::swap;
-  swap(initialized_, rhs.initialized_);
-  swap(error_,       rhs.error_);
-  swap(value_,       rhs.value_);
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getType' is called on an uninitialized object.");
+  }
+  return Enek::FeatureTemplate::Type::string;
 }
 
-StringLiteral &StringLiteral::operator=(StringLiteral const &rhs)
+std::string const &StringLiteral::getValue() const
 {
-  ENEK_ASSERT(rhs.isInitialized());
-  ENEK_ASSERT(!this->isInitialized());
-  StringLiteral(rhs).swap(*this);
-  return *this;
-}
-
-StringLiteral &StringLiteral::operator=(StringLiteral &&rhs) noexcept
-{
-  ENEK_ASSERT(rhs.isInitialized());
-  ENEK_ASSERT(!this->isInitialized());
-  StringLiteral(std::move(rhs)).swap(*this);
-  return *this;
-}
-
-std::string const &StringLiteral::getValue() const noexcept
-{
-  ENEK_ASSERT(this->isInitialized());
-  ENEK_ASSERT(this->succeed());
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is called on an uninitialized object.");
+  }
+  if (!this->succeed()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is caleld on an object initialized with failed parse.");
+  }
   return value_;
 }
 
@@ -73,9 +69,14 @@ void StringLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
     ENEK_THROW<std::invalid_argument>(
-      "`dumpXML' is called on an uninitialized `StringLiteral'.");
+      "`dumpXML' is called on an uninitialized object.");
   }
-  os << "<string_literal>" << value_ << "</string_literal>";
+  if (this->succeed()) {
+    os << "<string_literal>" << this->getValue() << "</string_literal>";
+  }
+  else {
+    os << "<string_literal succeed=\"false\"/>";
+  }
 }
 
 } // namespace Enek::FeatureTemplate::Parsing

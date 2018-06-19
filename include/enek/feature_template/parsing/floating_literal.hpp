@@ -1,6 +1,8 @@
 #if !defined(ENEK_FEATURE_TEMPLATE_PARSING_FLOATING_LITERAL_HPP_INCLUDE_GUARD)
 #define ENEK_FEATURE_TEMPLATE_PARSING_FLOATING_LITERAL_HPP_INCLUDE_GUARD
 
+#include <enek/feature_template/type.hpp>
+#include <enek/util/throw.hpp>
 #include <enek/util/assert.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/end.hpp>
@@ -8,6 +10,8 @@
 #include <sstream>
 #include <ostream>
 #include <string>
+#include <stdexcept>
+
 
 namespace Enek::FeatureTemplate::Parsing{
 
@@ -18,27 +22,28 @@ public:
 
   FloatingLiteral(FloatingLiteral const &rhs) noexcept;
 
+  FloatingLiteral &operator=(FloatingLiteral const &rhs) = delete;
+
   bool isInitialized() const noexcept;
 
   template<typename Iterator>
   void initialize(boost::iterator_range<Iterator> const &parse_range)
   {
-    ENEK_ASSERT(!this->isInitialized());
+    if (this->isInitialized()) {
+      ENEK_THROW<std::invalid_argument>(
+        "Try to initialize an already initialized object.");
+    }
     std::string buf(boost::begin(parse_range), boost::end(parse_range));
     std::istringstream iss(buf);
     iss >> value_;
     initialized_ = true;
   }
 
-  bool succeed() const noexcept;
+  bool succeed() const;
 
-  void swap(FloatingLiteral &rhs) noexcept;
+  Enek::FeatureTemplate::Type getType() const;
 
-  friend void swap(FloatingLiteral &lhs, FloatingLiteral &rhs) noexcept;
-
-  FloatingLiteral &operator=(FloatingLiteral const &rhs) noexcept;
-
-  double getValue() const noexcept;
+  double getValue() const;
 
   void dumpXML(std::ostream &os) const;
 

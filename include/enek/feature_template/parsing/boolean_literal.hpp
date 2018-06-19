@@ -1,7 +1,9 @@
 #if !defined(ENEK_FEATURE_TEMPLATE_PARSING_BOOLEAN_LITERAL_HPP_INCLUDE_GUARD)
 #define ENEK_FEATURE_TEMPLATE_PARSING_BOOLEAN_LITERAL_HPP_INCLUDE_GUARD
 
-#include <ostream>
+#include <enek/feature_template/type.hpp>
+#include <iosfwd>
+
 
 namespace Enek::FeatureTemplate::Parsing{
 
@@ -12,19 +14,17 @@ public:
 
   BooleanLiteral(BooleanLiteral const &) noexcept;
 
+  BooleanLiteral &operator=(BooleanLiteral const &) = delete;
+
   bool isInitialized() const noexcept;
 
-  void initialize(bool value) noexcept;
+  void initialize(bool value);
 
-  bool succeed() const noexcept;
+  bool succeed() const;
 
-  void swap(BooleanLiteral &) noexcept;
+  Enek::FeatureTemplate::Type getType() const;
 
-  friend void swap(BooleanLiteral &, BooleanLiteral &) noexcept;
-
-  BooleanLiteral &operator=(BooleanLiteral const &) noexcept;
-
-  bool getValue() const noexcept;
+  bool getValue() const;
 
   void dumpXML(std::ostream &) const;
 

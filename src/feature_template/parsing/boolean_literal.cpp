@@ -1,12 +1,11 @@
 #include <enek/feature_template/parsing/boolean_literal.hpp>
-
+#include <enek/feature_template/type.hpp>
 #include <enek/util/throw.hpp>
-#include <enek/util/assert.hpp>
 #include <boost/io/ios_state.hpp>
 #include <ostream>
 #include <ios>
-#include <utility>
 #include <stdexcept>
+
 
 namespace Enek::FeatureTemplate::Parsing{
 
@@ -22,42 +21,44 @@ bool BooleanLiteral::isInitialized() const noexcept
   return initialized_;
 }
 
-void BooleanLiteral::initialize(bool value) noexcept
+void BooleanLiteral::initialize(bool value)
 {
-  ENEK_ASSERT(!this->isInitialized());
+  if (this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "Try to initialize an already initialized object.");
+  }
   value_ = value;
   initialized_ = true;
 }
 
-bool BooleanLiteral::succeed() const noexcept
+bool BooleanLiteral::succeed() const
 {
-  ENEK_ASSERT(this->isInitialized());
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`succeed' is called on an uninitialized object.");
+  }
   return true;
 }
 
-void BooleanLiteral::swap(BooleanLiteral &rhs) noexcept
+Enek::FeatureTemplate::Type BooleanLiteral::getType() const
 {
-  using std::swap;
-  swap(value_,       rhs.value_);
-  swap(initialized_, rhs.initialized_);
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getType' is called on an uninitialized object.");
+  }
+  return Enek::FeatureTemplate::Type::boolean;
 }
 
-void swap(BooleanLiteral &lhs, BooleanLiteral &rhs) noexcept
+bool BooleanLiteral::getValue() const
 {
-  lhs.swap(rhs);
-}
-
-BooleanLiteral &BooleanLiteral::operator=(BooleanLiteral const &rhs) noexcept
-{
-  ENEK_ASSERT(rhs.isInitialized());
-  ENEK_ASSERT(!this->isInitialized());
-  BooleanLiteral(rhs).swap(*this);
-  return *this;
-}
-
-bool BooleanLiteral::getValue() const noexcept
-{
-  ENEK_ASSERT(this->isInitialized());
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is called on an uninitialized object.");
+  }
+  if (!this->succeed()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is called on an object initialized with failed parse.");
+  }
   return value_;
 }
 
@@ -65,11 +66,16 @@ void BooleanLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
     ENEK_THROW<std::invalid_argument>(
-      "`dumpXML' is called on an uninitialized `BooleanLiteral'.");
+      "`dumpXML' is called on an uninitialized object.");
   }
-  boost::io::ios_flags_saver saver(os);
-  os << "<boolean_literal>" << std::boolalpha << value_
-     << "</boolean_literal>";
+  if (this->succeed()) {
+    boost::io::ios_flags_saver saver(os);
+    os << "<boolean_literal>" << std::boolalpha << this->getValue()
+       << "</boolean_literal>";
+  }
+  else {
+    os << "<boolean_literal succeed=\"false\"/>";
+  }
 }
 
 } // namespace Enek::FeatureTemplate::Parsing
