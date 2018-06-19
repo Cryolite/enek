@@ -1,10 +1,10 @@
 #include <enek/feature_template/parsing/floating_literal.hpp>
-
+#include <enek/feature_template/type.hpp>
 #include <enek/util/throw.hpp>
 #include <enek/util/assert.hpp>
 #include <ostream>
-#include <utility>
 #include <stdexcept>
+
 
 namespace Enek::FeatureTemplate::Parsing{
 
@@ -23,36 +23,34 @@ bool FloatingLiteral::isInitialized() const noexcept
   return initialized_;
 }
 
-bool FloatingLiteral::succeed() const noexcept
+bool FloatingLiteral::succeed() const
 {
-  ENEK_ASSERT(this->isInitialized());
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`succeed' is called on an uninitialized object.");
+  }
   return true;
 }
 
-void FloatingLiteral::swap(FloatingLiteral &rhs) noexcept
+Enek::FeatureTemplate::Type FloatingLiteral::getType() const
 {
-  using std::swap;
-  swap(initialized_, rhs.initialized_);
-  swap(value_,       rhs.value_);
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getType' is called on an uninitialized object.");
+  }
+  return Enek::FeatureTemplate::Type::floating;
 }
 
-void swap(FloatingLiteral &lhs, FloatingLiteral &rhs) noexcept
+double FloatingLiteral::getValue() const
 {
-  lhs.swap(rhs);
-}
-
-FloatingLiteral &
-FloatingLiteral::operator=(FloatingLiteral const &rhs) noexcept
-{
-  ENEK_ASSERT(rhs.isInitialized());
-  ENEK_ASSERT(!this->isInitialized());
-  FloatingLiteral(rhs).swap(*this);
-  return *this;
-}
-
-double FloatingLiteral::getValue() const noexcept
-{
-  ENEK_ASSERT(this->isInitialized());
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is called on an uninitialized object.");
+  }
+  if (!this->succeed()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is called on an object initialized with failed parse.");
+  }
   return value_;
 }
 
@@ -60,7 +58,7 @@ void FloatingLiteral::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
     ENEK_THROW<std::invalid_argument>(
-      "error: `dumpXML' is called on an uninitialized `FloatingLiteral'.");
+      "`dumpXML' is called on an uninitialized object.");
   }
   os << "<floating_literal>" << value_ << "</floating_literal>";
 }

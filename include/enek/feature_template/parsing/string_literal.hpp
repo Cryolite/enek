@@ -2,6 +2,7 @@
 #define ENEK_FEATURE_TEMPLATE_PARSING_STRING_LITERAL_HPP_INCLUDE_GUARD
 
 #include <enek/feature_template/parsing/print_message.hpp>
+#include <enek/feature_template/type.hpp>
 #include <enek/unicode/utf8.hpp>
 #include <enek/unicode/char.hpp>
 #include <ostream>
@@ -19,6 +20,8 @@ public:
   StringLiteral(StringLiteral const &);
 
   StringLiteral(StringLiteral &&) noexcept;
+
+  StringLiteral &operator=(StringLiteral const &) = delete;
 
   bool isInitialized() const noexcept;
 
@@ -231,17 +234,11 @@ public:
     value_.clear();
   }
 
-  bool succeed() const noexcept;
+  bool succeed() const;
 
-  void swap(StringLiteral &) noexcept;
+  Enek::FeatureTemplate::Type getType() const;
 
-  friend void swap(StringLiteral &, StringLiteral &) noexcept;
-
-  StringLiteral &operator=(StringLiteral const &);
-
-  StringLiteral &operator=(StringLiteral &&) noexcept;
-
-  std::string const &getValue() const noexcept;
+  std::string const &getValue() const;
 
   void dumpXML(std::ostream &) const;
 

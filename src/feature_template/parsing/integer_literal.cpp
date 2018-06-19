@@ -1,6 +1,7 @@
 #include <enek/feature_template/parsing/integer_literal.hpp>
 #include <enek/feature_template/parsing/print_message.hpp>
 #include <enek/feature_template/parsing/text_position_iterator.hpp>
+#include <enek/feature_template/type.hpp>
 #include <enek/util/throw.hpp>
 #include <enek/util/assert.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -147,11 +148,24 @@ bool IntegerLiteral::succeed() const
   return !error_;
 }
 
+Enek::FeatureTemplate::Type IntegerLiteral::getType() const
+{
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getType' is called on an uninitialized object.");
+  }
+  return Enek::FeatureTemplate::Type::integer;
+}
+
 std::int_fast64_t IntegerLiteral::getValue() const
 {
   if (!this->isInitialized()) {
     ENEK_THROW<std::invalid_argument>(
       "`getValue' is called on an uninitialized object.");
+  }
+  if (!this->succeed()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getValue' is called on an object initialized with failed parse.");
   }
   return value_;
 }
@@ -162,7 +176,7 @@ void IntegerLiteral::dumpXML(std::ostream &os) const
     ENEK_THROW<std::invalid_argument>(
       "`dumpXML' is called on an uninitialized object.");
   }
-  if (!error_) {
+  if (this->succeed()) {
     os << "<integer_literal>" << this->getValue() << "</integer_literal>";
   }
   else {

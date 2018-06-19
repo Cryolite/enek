@@ -1,5 +1,4 @@
 #include <enek/feature_template/parsing/ast.hpp>
-
 #include <enek/feature_template/parsing/floating_literal.hpp>
 #include <enek/feature_template/parsing/integer_literal.hpp>
 #include <enek/feature_template/parsing/boolean_literal.hpp>
@@ -8,6 +7,7 @@
 #include <enek/util/assert.hpp>
 #include <enek/util/type_name.hpp>
 #include <ostream>
+#include <functional>
 #include <variant>
 #include <utility>
 #include <stdexcept>
@@ -20,13 +20,18 @@ namespace{
 class IsInitializedASTVisitor
 {
 public:
-  IsInitializedASTVisitor()
-  {}
+  constexpr IsInitializedASTVisitor() = default;
 
-  bool operator()(UninitializedASTNode const &) const
+  IsInitializedASTVisitor(IsInitializedASTVisitor const &) = delete;
+
+  IsInitializedASTVisitor &operator=(IsInitializedASTVisitor const &) = delete;
+
+  bool operator()(UninitializedASTNode const &node) const noexcept
   {
-    ENEK_THROW<std::logic_error>(
-      "error: `isInitialized' is called on `UninitializedASTNode'.");
+    using std::placeholders::_1;
+    ENEK_THROW<std::logic_error>(_1)
+      << "`isInitialized' is called on an object of type `"
+      << Enek::getTypeName(node) << "'.";
     return false;
   }
 
@@ -37,7 +42,7 @@ public:
   }
 }; // class IsInitializedASTVisitor
 
-bool isInitialized(Enek::FeatureTemplate::Parsing::ASTNode const &node)
+bool isInitialized(Enek::FeatureTemplate::Parsing::ASTNode const &node) noexcept
 {
   IsInitializedASTVisitor vis;
   return std::visit(vis, node);
@@ -46,18 +51,23 @@ bool isInitialized(Enek::FeatureTemplate::Parsing::ASTNode const &node)
 class SucceedASTVisitor
 {
 public:
-  SucceedASTVisitor()
-  {}
+  constexpr SucceedASTVisitor() = default;
 
-  bool operator()(UninitializedASTNode const &) const
+  SucceedASTVisitor(SucceedASTVisitor const &) = delete;
+
+  SucceedASTVisitor &operator=(SucceedASTVisitor const &) = delete;
+
+  bool operator()(UninitializedASTNode const &node) const
   {
-    ENEK_THROW<std::logic_error>(
-      "error: `succeed' is called on `UninitializedASTNode'.");
+    using std::placeholders::_1;
+    ENEK_THROW<std::logic_error>(_1)
+      << "`succeed' is called on an object of type `"
+      << Enek::getTypeName(node) << "'.";
     return false;
   }
 
   template<typename ASTNode>
-  bool operator()(ASTNode const &node) const noexcept
+  bool operator()(ASTNode const &node) const
   {
     return node.succeed();
   }
@@ -69,12 +79,48 @@ bool succeed(ASTNode const &node)
   return std::visit(vis, node);
 }
 
+class GetTypeASTVisitor
+{
+public:
+  constexpr GetTypeASTVisitor() = default;
+
+  GetTypeASTVisitor(GetTypeASTVisitor const &) = delete;
+
+  GetTypeASTVisitor &operator=(GetTypeASTVisitor const &) = delete;
+
+  Enek::FeatureTemplate::Type operator()(
+    UninitializedASTNode const &node) const
+  {
+    using std::placeholders::_1;
+    ENEK_THROW<std::logic_error>(_1)
+      << "`getType' is called on an object of type `"
+      << Enek::getTypeName(node) << "'.";
+    return Enek::FeatureTemplate::Type::unknown;
+  }
+
+  template<typename ASTNode>
+  Enek::FeatureTemplate::Type operator()(ASTNode const &node) const
+  {
+    return node.getType();
+  }
+}; // class GetTypeASTVisitor
+
+Enek::FeatureTemplate::Type getType(ASTNode const &node)
+{
+  GetTypeASTVisitor vis;
+  return std::visit(vis, node);
+}
+
 class DumpXMLASTVisitor
 {
 public:
-  explicit DumpXMLASTVisitor(std::ostream &os)
+  explicit DumpXMLASTVisitor(std::ostream &os) noexcept
     : os_(os)
   {}
+
+  DumpXMLASTVisitor(DumpXMLASTVisitor const &) = delete;
+
+  DumpXMLASTVisitor &operator=(DumpXMLASTVisitor const &) = delete;
 
   void operator()(UninitializedASTNode const &)
   {
@@ -114,7 +160,10 @@ AST::AST(AST &&rhs) noexcept
 
 bool AST::isInitialized() const noexcept
 {
-  return root_node_.index() != 0;
+  if (root_node_.index() == 0) {
+    return false;
+  }
+  return Enek::FeatureTemplate::Parsing::isInitialized(root_node_);
 }
 
 template<typename ASTNode>
@@ -141,19 +190,35 @@ template
 void AST::moveAssign<Enek::FeatureTemplate::Parsing::StringLiteral>(
   Enek::FeatureTemplate::Parsing::StringLiteral &&);
 
-bool AST::succeed() const noexcept
+bool AST::succeed() const
 {
-  ENEK_ASSERT(this->isInitialized());
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`succeed' is called on an uninitialized object.");
+  }
   return Enek::FeatureTemplate::Parsing::succeed(root_node_);
+}
+
+Enek::FeatureTemplate::Type AST::getType() const
+{
+  if (!this->isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`getType' is called on an uninitialized object.");
+  }
+  return Enek::FeatureTemplate::Parsing::getType(root_node_);
 }
 
 void AST::dumpXML(std::ostream &os) const
 {
   if (!this->isInitialized()) {
     ENEK_THROW<std::invalid_argument>(
-      "error: `dumpXML' is called on an uninitialized `AST'.");
+      "`dumpXML' is called on an uninitialized object.");
   }
-  os << "<feature_template>";
+  os << "<feature_template";
+  if (!this->succeed()) {
+    os << " succeed=\"false\"";
+  }
+  os << " type=\"" << this->getType() << "\">";
   Enek::FeatureTemplate::Parsing::dumpXML(root_node_, os);
   os << "</feature_template>";
 }

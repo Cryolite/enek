@@ -1,6 +1,7 @@
 #if !defined(ENEK_FEATURE_TEMPLATE_PARSING_INTEGER_LITERAL_HPP_INCLUDE_GUARD)
 #define ENEK_FEATURE_TEMPLATE_PARSING_INTEGER_LITERAL_HPP_INCLUDE_GUARD
 
+#include <enek/feature_template/type.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <filesystem>
 #include <iosfwd>
@@ -19,6 +20,8 @@ public:
 
   IntegerLiteral(IntegerLiteral const &rhs) noexcept;
 
+  IntegerLiteral &operator=(IntegerLiteral const &) = delete;
+
   bool isInitialized() const noexcept;
 
   template<typename Iterator, typename BaseIterator>
@@ -29,6 +32,8 @@ public:
     std::ostream &os);
 
   bool succeed() const;
+
+  Enek::FeatureTemplate::Type getType() const;
 
   std::int_fast64_t getValue() const;
 
