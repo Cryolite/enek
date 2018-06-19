@@ -87,10 +87,10 @@ private:
     to.moveAssign(std::move(from));
   }
 
-  static void initializeFloatingLiteral(
-    FloatingLiteral &self, IteratorRange const &parse_range)
+  void initializeFloatingLiteral(FloatingLiteral &self,
+                                 IteratorRange const &parse_range)
   {
-    self.initialize(parse_range);
+    self.initialize(parse_range, path_, text_range_, os_);
   }
 
   static void moveAssignFloatingLiteral(FloatingLiteral &from, AST &to)
@@ -164,7 +164,7 @@ public:
         >> ((*qi::digit >> '.' >> +qi::digit | +qi::digit >> '.') >> -((qi::lit('e') | 'E') >> -(qi::lit('+') | '-') >> +qi::digit)
             | +qi::digit >> (qi::lit('e') | 'E') >> -(qi::lit('+') | '-') >> +qi::digit)
         ]]
-      [phx::bind(&initializeFloatingLiteral, qi::_val, qi::_1)]
+      [phx::bind(&Grammar::initializeFloatingLiteral, this, qi::_val, qi::_1)]
       ;
     boolean_literal_
       = qi::bool_[phx::bind(&initializeBooleanLiteral, qi::_val, qi::_1)]
