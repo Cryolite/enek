@@ -1,5 +1,5 @@
 #include <enek/feature_template/parsing/floating_literal.hpp>
-#include <enek/feature_template/parsing/print_message.hpp>
+#include <enek/feature_template/parsing/message_printer.hpp>
 #include <enek/feature_template/parsing/text_position_iterator.hpp>
 #include <enek/feature_template/type.hpp>
 #include <enek/util/throw.hpp>
