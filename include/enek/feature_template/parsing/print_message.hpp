@@ -65,6 +65,12 @@ void printMessage(std::filesystem::path const &path,
     while (iter != caret_last && *iter != '\r' && *iter != '\n') {
       os << *iter++;
     }
+    if (iter == caret_last) {
+      BaseIterator const base_last = iter.getLineLastPosition(text_last);
+      for (BaseIterator jter = iter.getBaseIterator(); jter != base_last; ++jter) {
+        os << *jter;
+      }
+    }
     os << '\n';
     std::size_t const caret_last_column = iter.getColumnNumber();
     {
@@ -80,6 +86,7 @@ void printMessage(std::filesystem::path const &path,
     if (iter == caret_last) {
       break;
     }
+    ENEK_ASSERT(*iter == '\r' || *iter == '\n');
     if (*iter == '\r') {
       ++iter;
       if (iter == caret_last) {
