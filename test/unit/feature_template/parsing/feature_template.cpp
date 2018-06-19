@@ -2,16 +2,6 @@
 #include <gtest/gtest.h>
 
 
-TEST(FeatureTemplateTest, acceptBooleanLiteral)
-{
-  testParse("false",
-            "<feature_template type=\"boolean\"><boolean_literal>false</boolean_literal></feature_template>",
-            "");
-  testParse("true",
-            "<feature_template type=\"boolean\"><boolean_literal>true</boolean_literal></feature_template>",
-            "");
-}
-
 TEST(FeatureTemplateTest, acceptStringLiteral)
 {
   testParse("\"\"",
