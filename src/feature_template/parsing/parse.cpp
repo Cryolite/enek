@@ -3,7 +3,7 @@
 #include <enek/feature_template/parsing/grammar.hpp>
 #include <enek/feature_template/parsing/ast.hpp>
 #include <enek/feature_template/parsing/text_position_iterator.hpp>
-#include <enek/feature_template/input_type.hpp>
+#include <enek/feature_template/parsing/input_type.hpp>
 #include <boost/spirit/include/qi_parse.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/end.hpp>
@@ -19,7 +19,7 @@ namespace Enek::FeatureTemplate::Parsing{
 using Path = std::filesystem::path;
 
 Enek::FeatureTemplate::Parsing::AST
-parse(Enek::FeatureTemplate::InputType input_type,
+parse(Enek::FeatureTemplate::Parsing::InputType input_type,
       Path const &path,
       std::string const &text,
       std::ostream &os)
@@ -42,7 +42,7 @@ parse(Enek::FeatureTemplate::InputType input_type,
 }
 
 Enek::FeatureTemplate::Parsing::AST
-parse(Enek::FeatureTemplate::InputType input_type,
+parse(Enek::FeatureTemplate::Parsing::InputType input_type,
       std::string const &text,
       std::ostream &os)
 {

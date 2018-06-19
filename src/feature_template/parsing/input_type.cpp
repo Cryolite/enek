@@ -1,11 +1,11 @@
-#include <enek/feature_template/input_type.hpp>
+#include <enek/feature_template/parsing/input_type.hpp>
 #include <enek/util/throw.hpp>
 #include <ostream>
 #include <functional>
 #include <stdexcept>
 
 
-namespace Enek::FeatureTemplate{
+namespace Enek::FeatureTemplate::Parsing{
 
 std::ostream &operator<<(std::ostream &os, InputType rhs)
 {
@@ -26,4 +26,4 @@ std::ostream &operator<<(std::ostream &os, InputType rhs)
   return os;
 }
 
-} // namespace Enek::FeatureTemplate
+} // namespace Enek::FeatureTemplate::Parsing
