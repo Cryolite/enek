@@ -14,6 +14,8 @@ TEST(FeatureTemplateParsingIntegerLiteralTest, testDefaultConstructor)
   EXPECT_FALSE(il.isInitialized());
   EXPECT_THROW(il.succeed(), std::invalid_argument);
   EXPECT_THROW(il.succeed(), boost::exception);
+  EXPECT_THROW(il.getType(), std::invalid_argument);
+  EXPECT_THROW(il.getType(), boost::exception);
   EXPECT_THROW(il.getValue(), std::invalid_argument);
   EXPECT_THROW(il.getValue(), boost::exception);
   {
