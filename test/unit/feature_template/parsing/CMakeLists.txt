@@ -3,6 +3,7 @@ add_executable(test_unit_feature_template_parsing
   text_position_iterator.cpp
   integer_literal.cpp
   floating_literal.cpp
+  boolean_literal.cpp
   feature_template.cpp)
 target_include_directories(test_unit_feature_template_parsing
   PRIVATE .)
