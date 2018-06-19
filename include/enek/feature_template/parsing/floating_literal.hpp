@@ -9,6 +9,9 @@
 
 namespace Enek::FeatureTemplate::Parsing{
 
+template<typename Iterator>
+class Grammar;
+
 class FloatingLiteral
 {
 public:
@@ -23,12 +26,17 @@ public:
 
   bool isInitialized() const noexcept;
 
+private:
+  template<typename Iterator>
+  friend class Grammar;
+
   template<typename Iterator, typename BaseIterator>
   void initialize(boost::iterator_range<Iterator> const &parse_range,
                   Path const &path,
                   boost::iterator_range<BaseIterator> const &text_range,
                   std::ostream &os);
 
+public:
   bool succeed() const;
 
   Enek::FeatureTemplate::Type getType() const;
