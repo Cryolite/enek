@@ -34,12 +34,16 @@ public:
   {}
 }; // class UninitializedASTNode
 
-using ASTNode = std::variant<
+namespace Detail{
+
+using ASTImpl = std::variant<
   UninitializedASTNode,
   Enek::FeatureTemplate::Parsing::IntegerLiteral,
   Enek::FeatureTemplate::Parsing::FloatingLiteral,
   Enek::FeatureTemplate::Parsing::BooleanLiteral,
   Enek::FeatureTemplate::Parsing::StringLiteral>;
+
+} // namespace Detail
 
 class AST
 {
@@ -65,7 +69,7 @@ public:
   friend void Enek::FeatureTemplate::visit(Visitor &&visitor, AST const &ast);
 
 private:
-  ASTNode root_node_;
+  Detail::ASTImpl impl_;
 }; // class AST
 
 } // namespace Parsing
@@ -140,7 +144,7 @@ void visit(Visitor &&visitor, Parsing::AST const &ast)
       "`visit' is called on an uninitialized object.");
   }
   Detail::VisitImpl<Visitor &&> vis(std::forward<Visitor>(visitor));
-  std::visit(vis, ast.root_node_);
+  std::visit(vis, ast.impl_);
 }
 
 } // namespace Enek::FeatureTemplate
