@@ -44,10 +44,10 @@ public:
   }
 }; // class IsInitializedASTVisitor
 
-bool isInitialized(Enek::FeatureTemplate::Parsing::ASTNode const &node) noexcept
+bool isInitialized(Detail::ASTImpl const &impl) noexcept
 {
   IsInitializedASTVisitor vis;
-  return std::visit(vis, node);
+  return std::visit(vis, impl);
 }
 
 class SucceedASTVisitor
@@ -77,10 +77,10 @@ public:
   }
 }; // class SucceedASTVisitor
 
-bool succeed(ASTNode const &node)
+bool succeed(Detail::ASTImpl const &impl)
 {
   SucceedASTVisitor vis;
-  return std::visit(vis, node);
+  return std::visit(vis, impl);
 }
 
 class GetTypeASTVisitor
@@ -111,32 +111,32 @@ public:
   }
 }; // class GetTypeASTVisitor
 
-Enek::FeatureTemplate::Type getType(ASTNode const &node)
+Enek::FeatureTemplate::Type getType(Detail::ASTImpl const &impl)
 {
   GetTypeASTVisitor vis;
-  return std::visit(vis, node);
+  return std::visit(vis, impl);
 }
 
 } // namespace *unnamed*
 
 AST::AST() noexcept
-  : root_node_()
+  : impl_()
 {}
 
 AST::AST(AST const &rhs)
-  : root_node_(rhs.root_node_)
+  : impl_(rhs.impl_)
 {}
 
 AST::AST(AST &&rhs) noexcept
-  : root_node_(std::move(rhs.root_node_))
+  : impl_(std::move(rhs.impl_))
 {}
 
 bool AST::isInitialized() const noexcept
 {
-  if (root_node_.index() == 0) {
+  if (impl_.index() == 0) {
     return false;
   }
-  return Enek::FeatureTemplate::Parsing::isInitialized(root_node_);
+  return Enek::FeatureTemplate::Parsing::isInitialized(impl_);
 }
 
 template<typename ASTNode>
@@ -153,7 +153,7 @@ void AST::moveAssign(ASTNode &&root_node)
       << "Try to initialize with an uninitialized object of type `"
       << Enek::getTypeName(root_node) << "'.";
   }
-  root_node_.emplace<ASTNode>(std::move(root_node));
+  impl_.emplace<ASTNode>(std::move(root_node));
 }
 
 template
@@ -175,7 +175,7 @@ bool AST::succeed() const
     ENEK_THROW<std::invalid_argument>(
       "`succeed' is called on an uninitialized object.");
   }
-  return Enek::FeatureTemplate::Parsing::succeed(root_node_);
+  return Enek::FeatureTemplate::Parsing::succeed(impl_);
 }
 
 Enek::FeatureTemplate::Type AST::getType() const
@@ -184,7 +184,7 @@ Enek::FeatureTemplate::Type AST::getType() const
     ENEK_THROW<std::invalid_argument>(
       "`getType' is called on an uninitialized object.");
   }
-  return Enek::FeatureTemplate::Parsing::getType(root_node_);
+  return Enek::FeatureTemplate::Parsing::getType(impl_);
 }
 
 } // namespace Enek::FeatureTemplate::Parsing
