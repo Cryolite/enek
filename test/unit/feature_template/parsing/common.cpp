@@ -2,8 +2,8 @@
 #include <enek/feature_template/visitor/xml_dumper.hpp>
 #include <enek/feature_template/parsing/parse.hpp>
 #include <enek/feature_template/parsing/ast.hpp>
+#include <enek/feature_template/parsing/placeholder_type.hpp>
 #include <enek/feature_template/type.hpp>
-#include <enek/feature_template/parsing/input_type.hpp>
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
@@ -18,7 +18,7 @@ Enek::FeatureTemplate::Parsing::AST testParse(
 {
   namespace Parsing = Enek::FeatureTemplate::Parsing;
   std::ostringstream error_oss;
-  Parsing::AST ast = Parsing::parse(Parsing::InputType::word,
+  Parsing::AST ast = Parsing::parse(Parsing::PlaceholderType::word,
                                     text_to_be_parsed,
                                     error_oss);
   EXPECT_EQ(succeed, ast.succeed())

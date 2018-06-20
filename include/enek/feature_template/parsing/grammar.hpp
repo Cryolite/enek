@@ -6,7 +6,7 @@
 #include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <enek/feature_template/parsing/floating_literal.hpp>
 #include <enek/feature_template/parsing/integer_literal.hpp>
-#include <enek/feature_template/parsing/input_type.hpp>
+#include <enek/feature_template/parsing/placeholder_type.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/bind/bind_function.hpp>
@@ -60,8 +60,8 @@ struct Grammar
   : boost::spirit::qi::grammar<Iterator, Enek::FeatureTemplate::Parsing::AST()>
 {
 private:
+  using PlaceholderType = Enek::FeatureTemplate::Parsing::PlaceholderType;
   using BaseIterator = typename Iterator::BaseIterator;
-
   using IntegerLiteral = Enek::FeatureTemplate::Parsing::IntegerLiteral;
   using FloatingLiteral = Enek::FeatureTemplate::Parsing::FloatingLiteral;
   using BooleanLiteral = Enek::FeatureTemplate::Parsing::BooleanLiteral;
@@ -120,12 +120,12 @@ private:
   }
 
 public:
-  Grammar(Enek::FeatureTemplate::Parsing::InputType input_type,
+  Grammar(PlaceholderType placeholder_type,
           Path const &path,
           BaseIteratorRange const &text_range,
           std::ostream &os)
     : Grammar::base_type(feature_template_, "feature_template")
-    , input_type_(input_type)
+    , placeholder_type_(placeholder_type)
     , path_(path)
     , text_range_(text_range)
     , os_(os)
@@ -277,7 +277,7 @@ private:
   using Rule = boost::spirit::qi::rule<Iterator, Attribute()>;
 
 private:
-  Enek::FeatureTemplate::Parsing::InputType input_type_;
+  PlaceholderType placeholder_type_;
   Path const &path_;
   BaseIteratorRange const &text_range_;
   std::ostream &os_;
