@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 
+using Type = Enek::FeatureTemplate::Type;
 using BooleanLiteral = Enek::FeatureTemplate::Parsing::BooleanLiteral;
 
 TEST(FeatureTemplateParsingBooleanLiteralTest, testDefaultConstructor)
@@ -22,9 +23,13 @@ TEST(FeatureTemplateParsingBooleanLiteralTest, testDefaultConstructor)
 TEST(FeatureTemplateParsingBooleanLiteralTest, testParse)
 {
   testParse("false",
+            true,
+            Type::boolean,
             "<boolean_literal>false</boolean_literal>",
             "");
   testParse("true",
+            true,
+            Type::boolean,
             "<boolean_literal>true</boolean_literal>",
             "");
 }
