@@ -1,4 +1,4 @@
-#include <enek/feature_template/parsing/input_type.hpp>
+#include <enek/feature_template/parsing/placeholder_type.hpp>
 #include <enek/util/throw.hpp>
 #include <enek/util/type_name.hpp>
 #include <ostream>
@@ -8,14 +8,14 @@
 
 namespace Enek::FeatureTemplate::Parsing{
 
-std::ostream &operator<<(std::ostream &os, InputType rhs)
+std::ostream &operator<<(std::ostream &os, PlaceholderType rhs)
 {
   using std::placeholders::_1;
   switch (rhs) {
-  case InputType::word:
+  case PlaceholderType::word:
     os << "word";
     break;
-  case InputType::ngram:
+  case PlaceholderType::ngram:
     os << "ngram";
     break;
     // LCOV_EXCL_START
