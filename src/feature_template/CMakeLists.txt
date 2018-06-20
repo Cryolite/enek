@@ -1,4 +1,5 @@
 add_subdirectory(parsing)
+add_subdirectory(visitor)
 
 add_library(feature_template_local
   type.cpp)
@@ -10,5 +11,6 @@ target_link_libraries(feature_template_local
 
 add_library(feature_template INTERFACE)
 target_link_libraries(feature_template
+  INTERFACE feature_template_visitor
   INTERFACE feature_template_parsing
   INTERFACE feature_template_local)

@@ -43,8 +43,6 @@ public:
 
   double getValue() const;
 
-  void dumpXML(std::ostream &os) const;
-
 private:
   bool initialized_;
   bool error_;

@@ -3,10 +3,10 @@
 #include <enek/feature_template/parsing/integer_literal.hpp>
 #include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <enek/feature_template/parsing/string_literal.hpp>
+#include <enek/feature_template/type.hpp>
 #include <enek/util/throw.hpp>
-#include <enek/util/assert.hpp>
 #include <enek/util/type_name.hpp>
-#include <ostream>
+#include <type_traits>
 #include <functional>
 #include <variant>
 #include <utility>
@@ -117,41 +117,6 @@ Enek::FeatureTemplate::Type getType(ASTNode const &node)
   return std::visit(vis, node);
 }
 
-class DumpXMLASTVisitor
-{
-public:
-  explicit DumpXMLASTVisitor(std::ostream &os) noexcept
-    : os_(os)
-  {}
-
-  DumpXMLASTVisitor(DumpXMLASTVisitor const &) = delete;
-
-  DumpXMLASTVisitor &operator=(DumpXMLASTVisitor const &) = delete;
-
-  // LCOV_EXCL_START
-  void operator()(UninitializedASTNode const &)
-  {
-    ENEK_THROW<std::logic_error>(
-      "error: `dumpXML' is called on `UninitializedASTNode'.");
-  }
-  // LCOV_EXCL_STOP
-
-  template<typename ASTNode>
-  void operator()(ASTNode const &node)
-  {
-    node.dumpXML(os_);
-  }
-
-private:
-  std::ostream &os_;
-}; // class DumpXMLASTVisitor
-
-void dumpXML(ASTNode const &node, std::ostream &os)
-{
-  DumpXMLASTVisitor vis(os);
-  std::visit(vis, node);
-}
-
 } // namespace *unnamed*
 
 AST::AST() noexcept
@@ -220,21 +185,6 @@ Enek::FeatureTemplate::Type AST::getType() const
       "`getType' is called on an uninitialized object.");
   }
   return Enek::FeatureTemplate::Parsing::getType(root_node_);
-}
-
-void AST::dumpXML(std::ostream &os) const
-{
-  if (!this->isInitialized()) {
-    ENEK_THROW<std::invalid_argument>(
-      "`dumpXML' is called on an uninitialized object.");
-  }
-  os << "<feature_template";
-  if (!this->succeed()) {
-    os << " succeed=\"false\"";
-  }
-  os << " type=\"" << this->getType() << "\">";
-  Enek::FeatureTemplate::Parsing::dumpXML(root_node_, os);
-  os << "</feature_template>";
 }
 
 } // namespace Enek::FeatureTemplate::Parsing

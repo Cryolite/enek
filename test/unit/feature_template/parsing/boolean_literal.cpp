@@ -2,7 +2,6 @@
 #include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <gtest/gtest.h>
 #include <boost/exception/exception.hpp>
-#include <ostream>
 #include <stdexcept>
 
 
@@ -18,20 +17,15 @@ TEST(FeatureTemplateParsingBooleanLiteralTest, testDefaultConstructor)
   EXPECT_THROW(bl.getType(), boost::exception);
   EXPECT_THROW(bl.getValue(), std::invalid_argument);
   EXPECT_THROW(bl.getValue(), boost::exception);
-  {
-    std::ostringstream oss;
-    EXPECT_THROW(bl.dumpXML(oss), std::invalid_argument);
-    EXPECT_THROW(bl.dumpXML(oss), boost::exception);
-  }
 }
 
 TEST(FeatureTemplateParsingBooleanLiteralTest, testParse)
 {
   testParse("false",
-            "<feature_template type=\"boolean\"><boolean_literal>false</boolean_literal></feature_template>",
+            "<boolean_literal>false</boolean_literal>",
             "");
   testParse("true",
-            "<feature_template type=\"boolean\"><boolean_literal>true</boolean_literal></feature_template>",
+            "<boolean_literal>true</boolean_literal>",
             "");
 }
 

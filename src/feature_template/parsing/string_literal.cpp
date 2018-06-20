@@ -319,18 +319,4 @@ std::string const &StringLiteral::getValue() const
   return value_;
 }
 
-void StringLiteral::dumpXML(std::ostream &os) const
-{
-  if (!this->isInitialized()) {
-    ENEK_THROW<std::invalid_argument>(
-      "`dumpXML' is called on an uninitialized object.");
-  }
-  if (this->succeed()) {
-    os << "<string_literal>" << this->getValue() << "</string_literal>";
-  }
-  else {
-    os << "<string_literal succeed=\"false\"/>";
-  }
-}
-
 } // namespace Enek::FeatureTemplate::Parsing

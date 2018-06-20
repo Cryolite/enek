@@ -45,8 +45,6 @@ public:
 
   std::int_fast64_t getValue() const;
 
-  void dumpXML(std::ostream &os) const;
-
 private:
   bool initialized_;
   bool error_;

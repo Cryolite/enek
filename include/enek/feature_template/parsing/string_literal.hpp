@@ -46,8 +46,6 @@ public:
 
   std::string const &getValue() const;
 
-  void dumpXML(std::ostream &) const;
-
 private:
   bool initialized_;
   bool error_;

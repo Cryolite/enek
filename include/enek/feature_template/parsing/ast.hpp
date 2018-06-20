@@ -5,11 +5,27 @@
 #include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <enek/feature_template/parsing/floating_literal.hpp>
 #include <enek/feature_template/parsing/integer_literal.hpp>
+#include <enek/feature_template/type.hpp>
+#include <enek/util/throw.hpp>
 #include <ostream>
+#include <type_traits>
 #include <variant>
+#include <utility>
+#include <stdexcept>
 
 
-namespace Enek::FeatureTemplate::Parsing{
+namespace Enek::FeatureTemplate{
+
+namespace Parsing{
+
+class AST;
+
+} // namespace Parsing
+
+template<typename Visitor>
+void visit(Visitor &&visitor, Parsing::AST const &ast);
+
+namespace Parsing{
 
 class UninitializedASTNode
 {
@@ -45,12 +61,86 @@ public:
 
   Enek::FeatureTemplate::Type getType() const;
 
-  void dumpXML(std::ostream &os) const;
+  template<typename Visitor>
+  friend void Enek::FeatureTemplate::visit(Visitor &&visitor, AST const &ast);
 
 private:
   ASTNode root_node_;
 }; // class AST
 
-} // namespace Enek::FeatureTemplate::Parsing
+} // namespace Parsing
+
+namespace Detail{
+
+template<typename Visitor>
+class VisitImpl
+{
+private:
+  static_assert(std::is_reference_v<Visitor>);
+
+public:
+  using IntegerLiteral = Enek::FeatureTemplate::Parsing::IntegerLiteral;
+  using FloatingLiteral = Enek::FeatureTemplate::Parsing::FloatingLiteral;
+  using BooleanLiteral = Enek::FeatureTemplate::Parsing::BooleanLiteral;
+  using StringLiteral = Enek::FeatureTemplate::Parsing::StringLiteral;
+
+public:
+  explicit VisitImpl(Visitor visitor) noexcept
+    : visitor_(std::forward<Visitor>(visitor))
+  {}
+
+  VisitImpl(VisitImpl const &) = delete;
+
+  VisitImpl &operator=(VisitImpl const &) = delete;
+
+  void operator()(Parsing::UninitializedASTNode const &) const
+  {
+    ENEK_THROW<std::logic_error>(
+      "A logic error in `Enek::FeatureTemplate::visit'. "
+      "It should throw if the argument is not initialized.");
+  }
+
+  void operator()(IntegerLiteral const &node) const
+  {
+    visitor_.enter(node);
+    visitor_.leave(node);
+  }
+
+  void operator()(FloatingLiteral const &node) const
+  {
+    visitor_.enter(node);
+    visitor_.leave(node);
+  }
+
+  void operator()(BooleanLiteral const &node) const
+  {
+    visitor_.enter(node);
+    visitor_.leave(node);
+  }
+
+  void operator()(StringLiteral const &node) const
+  {
+    visitor_.enter(node);
+    visitor_.leave(node);
+  }
+
+private:
+  Visitor visitor_;
+}; // class VisitImpl
+
+} // namespace Detail
+
+template<typename Visitor>
+void visit(Visitor &&visitor, Parsing::AST const &ast)
+{
+  if (!ast.isInitialized()) {
+    ENEK_THROW<std::invalid_argument>(
+      "`visit' is called on an uninitialized object.");
+  }
+  Detail::VisitImpl<Visitor &&> vis(std::forward<Visitor>(visitor));
+  std::visit(vis, ast.root_node_);
+}
+
+} // namespace Enek::FeatureTemplate
 
 #endif // !defined(ENEK_FEATURE_TEMPLATE_PARSING_AST_HPP_INCLUDE_GUARD)

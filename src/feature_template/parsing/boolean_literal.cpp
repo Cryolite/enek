@@ -1,9 +1,6 @@
 #include <enek/feature_template/parsing/boolean_literal.hpp>
 #include <enek/feature_template/type.hpp>
 #include <enek/util/throw.hpp>
-#include <boost/io/ios_state.hpp>
-#include <ostream>
-#include <ios>
 #include <stdexcept>
 
 
@@ -60,22 +57,6 @@ bool BooleanLiteral::getValue() const
       "`getValue' is called on an object initialized with failed parse.");
   }
   return value_;
-}
-
-void BooleanLiteral::dumpXML(std::ostream &os) const
-{
-  if (!this->isInitialized()) {
-    ENEK_THROW<std::invalid_argument>(
-      "`dumpXML' is called on an uninitialized object.");
-  }
-  if (this->succeed()) {
-    boost::io::ios_flags_saver saver(os);
-    os << "<boolean_literal>" << std::boolalpha << this->getValue()
-       << "</boolean_literal>";
-  }
-  else {
-    os << "<boolean_literal succeed=\"false\"/>";
-  }
 }
 
 } // namespace Enek::FeatureTemplate::Parsing
