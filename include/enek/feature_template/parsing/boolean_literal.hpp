@@ -2,7 +2,6 @@
 #define ENEK_FEATURE_TEMPLATE_PARSING_BOOLEAN_LITERAL_HPP_INCLUDE_GUARD
 
 #include <enek/feature_template/type.hpp>
-#include <iosfwd>
 
 
 namespace Enek::FeatureTemplate::Parsing{
@@ -33,8 +32,6 @@ public:
   Enek::FeatureTemplate::Type getType() const;
 
   bool getValue() const;
-
-  void dumpXML(std::ostream &) const;
 
 private:
   bool initialized_;

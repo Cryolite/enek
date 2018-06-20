@@ -170,18 +170,4 @@ std::int_fast64_t IntegerLiteral::getValue() const
   return value_;
 }
 
-void IntegerLiteral::dumpXML(std::ostream &os) const
-{
-  if (!this->isInitialized()) {
-    ENEK_THROW<std::invalid_argument>(
-      "`dumpXML' is called on an uninitialized object.");
-  }
-  if (this->succeed()) {
-    os << "<integer_literal>" << this->getValue() << "</integer_literal>";
-  }
-  else {
-    os << "<integer_literal succeed=\"false\"/>";
-  }
-}
-
 } // namespace Enek::FeatureTemplate::Parsing
