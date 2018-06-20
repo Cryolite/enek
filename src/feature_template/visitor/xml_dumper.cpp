@@ -41,8 +41,10 @@ void XMLDumper::leave(BooleanLiteral const &node)
   ENEK_ASSERT(node.isInitialized());
   os_ << "<boolean_literal";
   if (!node.succeed()) {
+    // LCOV_EXCL_START
     os_ << " succeed=\"false\"/>";
     return;
+    // LCOV_EXCL_STOP
   }
   boost::io::ios_flags_saver ifs(os_);
   os_ << '>' << std::boolalpha << node.getValue() << "</boolean_literal>";

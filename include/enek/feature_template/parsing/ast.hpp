@@ -93,12 +93,14 @@ public:
 
   VisitImpl &operator=(VisitImpl const &) = delete;
 
+  // LCOV_EXCL_START
   void operator()(Parsing::UninitializedASTNode const &) const
   {
     ENEK_THROW<std::logic_error>(
       "A logic error in `Enek::FeatureTemplate::visit'. "
       "It should throw if the argument is not initialized.");
   }
+  // LCOV_EXCL_STOP
 
   void operator()(IntegerLiteral const &node) const
   {
