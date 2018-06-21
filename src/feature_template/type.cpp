@@ -27,11 +27,13 @@ std::ostream &operator<<(std::ostream &os, Type rhs)
   case Type::string:
     os << "string";
     break;
+    // LCOV_EXCL_START
   default:
     ENEK_THROW<std::logic_error>(_1)
       << "An unknown value `" << static_cast<int>(rhs) << "' of type `"
       << Enek::getTypeName(rhs) << "'.";
     break;
+    // LCOV_EXCL_STOP
   }
   return os;
 }

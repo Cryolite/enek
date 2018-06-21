@@ -1,9 +1,11 @@
 #include <enek/unicode/char.hpp>
 #include <enek/util/throw.hpp>
 #include <enek/util/assert.hpp>
+#include <enek/util/type_name.hpp>
 #include <unicode/uchar.h>
 #include <unicode/umachine.h>
 #include <ostream>
+#include <functional>
 #include <stdexcept>
 #include <cstdint>
 
@@ -27,6 +29,7 @@ bool isOtherSurrogate(char32_t c) noexcept
 
 std::ostream &operator<<(std::ostream &os, EastAsianWidth eaw)
 {
+  using std::placeholders::_1;
   switch (eaw) {
   case EastAsianWidth::fullwidth:
     os << "East Asian Fullwidth";
@@ -46,14 +49,20 @@ std::ostream &operator<<(std::ostream &os, EastAsianWidth eaw)
   case EastAsianWidth::neutral:
     os << "East Asian Neutral";
     break;
+    // LCOV_EXCL_START
   default:
-    ENEK_THROW<std::logic_error>("");
+    ENEK_THROW<std::logic_error>(_1)
+      << "An unknown value `" << static_cast<int>(eaw) << "' of type `"
+      << Enek::getTypeName(eaw) << "'.";
+    break;
+    // LCOV_EXCL_STOP
   }
   return os;
 }
 
 EastAsianWidth getEastAsianWidth(char32_t c)
 {
+  using std::placeholders::_1;
   EastAsianWidth result;
   {
     std::int32_t const v = u_getIntPropertyValue(
@@ -77,10 +86,13 @@ EastAsianWidth getEastAsianWidth(char32_t c)
     case UEastAsianWidth::U_EA_WIDE:
       result = EastAsianWidth::wide;
       break;
+      // LCOV_EXCL_START
     default:
-      ENEK_THROW<std::logic_error>(
-        "`u_getIntPropertyValue(c, UCHAR_EAST_ASIAN_WIDTH)' returns an "
-        "unknown value.");
+      ENEK_THROW<std::logic_error>(_1)
+        << "`u_getIntPropertyValue(c, UCHAR_EAST_ASIAN_WIDTH)' returns an "
+           "unknown value `" << v << "'.";
+      break;
+      // LCOV_EXCL_STOP
     }
   }
   return result;

@@ -14,6 +14,7 @@
 #include <iterator>
 #include <string>
 #include <type_traits>
+#include <functional>
 #include <utility>
 #include <stdexcept>
 #include <limits>
@@ -82,7 +83,9 @@ char32_t parseHexadecimalEscapeSequence(
     }
     c *= 16;
     if (c > std::numeric_limits<char32_t>::max() - x) {
-      overflow = true;
+      // Since integer overflow in hexadecimal representation occurs only when
+      // it is carried over, the control flow never reaches here.
+      overflow = true; // LCOV_EXCL_LINE
     }
     if (overflow) {
       ++iter;
@@ -99,7 +102,12 @@ char32_t parseHexadecimalEscapeSequence(
         "error: A hexadecimal escape sequence is too large.", os);
     }
     else {
+      // Since a universal character consists of either four or eight
+      // hexadecimal digits, it is guaranteed not to overflow, and the control
+      // flow never reaches here.
+      // LCOV_EXCL_START
       ENEK_THROW<std::logic_error>("A universal character name overflows.");
+      // LCOV_EXCL_STOP
     }
     return std::numeric_limits<char32_t>::max();
   }
@@ -149,6 +157,7 @@ void StringLiteral::initialize(
 {
   static_assert(
     std::is_same<typename Iterator::BaseIterator, BaseIterator>::value);
+  using std::placeholders::_1;
   if (this->isInitialized()) {
     ENEK_THROW<std::invalid_argument>(
       "Try to initialize an already initialized object.");
@@ -260,8 +269,14 @@ void StringLiteral::initialize(
       Enek::Unicode::UTF8::appendCodePoint(value_, c);
       break;
     }
+      // LCOV_EXCL_START
     default:
-      ENEK_THROW<std::logic_error>("");
+      // The caller of this function should guarantee that `parse_range` does
+      // not include any invalid escape sequence, and thus the control flow
+      // should not reach here.
+      ENEK_THROW<std::logic_error>(_1)
+        << "An unknown escape sequence `" << *escape_first << *iter << "'.";
+      // LCOV_EXCL_STOP
     }
   }
   initialized_ = true;
