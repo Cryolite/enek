@@ -102,7 +102,8 @@ void test(char const *file_name,
   std::ostringstream oss;
   printMessage(path, text_range, caret_range, message, oss);
   EXPECT_STREQ(message_to_be_expected, oss.str().c_str())
-    << file_name << ":" << line << ": Called from this line.";
+    << file_name << ":" << line // LCOV_EXCL_LINE
+    << ": Called from this line."; // LCOV_EXCL_LINE
 }
 
 } // namespace *unnamed*
