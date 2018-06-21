@@ -48,7 +48,7 @@ void printMessage(std::filesystem::path const &path,
       "error: The argument `message' is the null pointer.");
   }
   if (!path.empty()) {
-    os << path << ':';
+    os << path.generic_string() << ':';
   }
   std::size_t column = iter.getColumnNumber();
   os << iter.getLineNumber() + 1 << ':' << column + 1 << ": " << message
