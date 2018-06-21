@@ -1,4 +1,5 @@
 #include <enek/feature_template/parsing/ast.hpp>
+#include <enek/feature_template/visitor/base.hpp>
 #include <gtest/gtest.h>
 #include <boost/exception/exception.hpp>
 #include <stdexcept>
@@ -10,16 +11,14 @@ namespace{
 
 using Parsing::AST;
 
+using Enek::FeatureTemplate::VisitorBase;
+
 class Visitor
+  : private VisitorBase
 {
 public:
-  template<typename ASTNode>
-  void enter(ASTNode const &)
-  {}
-
-  template<typename ASTNode>
-  void leave(ASTNode const &)
-  {}
+  using VisitorBase::enter;
+  using VisitorBase::leave;
 }; // class Visitor
 
 } // namespace *unnamed*
