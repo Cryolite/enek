@@ -72,7 +72,7 @@ public:
 
   ExceptionThrower &operator=(ExceptionThrower const &) = delete;
 
-  ~ExceptionThrower() noexcept(false)
+  [[noreturn]] ~ExceptionThrower() noexcept(false)
   {
     throw boost::enable_error_info(
       std::apply(&ExceptionThrower::constructException, std::move(args_)))
@@ -174,7 +174,7 @@ public:
     return *this;
   }
 
-  ~ExceptionThrower() noexcept(false)
+  [[noreturn]] ~ExceptionThrower() noexcept(false)
   {
     throw boost::enable_error_info(
       std::apply(
