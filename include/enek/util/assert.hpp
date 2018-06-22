@@ -7,43 +7,42 @@
 #include <boost/current_function.hpp>
 #include <boost/config.hpp>
 #include <sstream>
-#include <ostream>
-#include <ios>
+#include <iosfwd>
 #include <utility>
 
 
 namespace Enek::Detail{
 
-class AbortMessenger
+class AssertMessenger
 {
 public:
-  AbortMessenger(char const *function_name,
-                 char const *file_name,
-                 int line_number,
-                 char const *expression,
-                 boost::stacktrace::stacktrace &&st,
-                 char const *git_commit_hash);
+  AssertMessenger(char const *function_name,
+                  char const *file_name,
+                  int line_number,
+                  char const *expression,
+                  boost::stacktrace::stacktrace &&stacktrace,
+                  char const *git_commit_hash);
 
-  AbortMessenger(AbortMessenger const &) = delete;
+  AssertMessenger(AssertMessenger const &) = delete;
 
-  AbortMessenger &operator=(AbortMessenger const &) = delete;
+  AssertMessenger &operator=(AssertMessenger const &) = delete;
 
   template<typename T>
-  AbortMessenger &operator<<(T &&x)
+  AssertMessenger &operator<<(T &&x)
   {
     oss_ << std::forward<T>(x);
     return *this;
   }
 
-  AbortMessenger &operator<<(std::ostream &(*pf)(std::ostream &));
+  AssertMessenger &operator<<(std::ostream &(*pf)(std::ostream &));
 
-  AbortMessenger &operator<<(std::ios &(*pf)(std::ios &));
+  AssertMessenger &operator<<(std::ios &(*pf)(std::ios &));
 
-  AbortMessenger &operator<<(std::ios_base &(*pf)(std::ios_base &));
+  AssertMessenger &operator<<(std::ios_base &(*pf)(std::ios_base &));
 
   operator int() const noexcept;
 
-  ~AbortMessenger();
+  [[noreturn]] ~AssertMessenger();
 
 private:
   std::ostringstream oss_;
@@ -53,54 +52,54 @@ private:
   char const *expression_;
   boost::stacktrace::stacktrace stacktrace_;
   char const *git_commit_hash_;
-}; // class AbortMessenge
+}; // class AssertMessenger
 
 } // namespace Enek::Detail
 
 #define ENEK_ASSERT(EXPR)                                            \
   BOOST_LIKELY(!!(EXPR)) ? 0 :                                       \
-   ::Enek::Detail::AbortMessenger(BOOST_CURRENT_FUNCTION,            \
+  ::Enek::Detail::AssertMessenger(BOOST_CURRENT_FUNCTION,            \
                                   __FILE__,                          \
                                   __LINE__,                          \
                                   #EXPR,                             \
                                   ::boost::stacktrace::stacktrace(), \
-                                  ENEK_GIT_COMMIT_HASH)
+                                  ENEK_GIT_COMMIT_HASH)              \
+  /**/
 
 #else // defined(ENEK_ENABLE_ASSERT)
 
-#include <ostream>
-#include <ios>
+#include <iosfwd>
 
 
 namespace Enek::Detail{
 
-class DummyAbortMessenger{
+class DummyAssertMessenger{
 public:
-  constexpr DummyAbortMessenger() = default;
+  constexpr DummyAssertMessenger() = default;
 
-  DummyAbortMessenger(DummyAbortMessenger const &) = delete;
+  DummyAssertMessenger(DummyAssertMessenger const &) = delete;
 
-  DummyAbortMessenger &operator=(DummyAbortMessenger const &) = delete;
+  DummyAssertMessenger &operator=(DummyAssertMessenger const &) = delete;
 
   template<typename T>
-  DummyAbortMessenger const &operator<<(T &&) const noexcept
+  DummyAssertMessenger const &operator<<(T &&) const noexcept
   {
     return *this;
   }
 
-  DummyAbortMessenger const &
+  DummyAssertMessenger const &
   operator<<(std::ostream &(*)(std::ostream &)) const noexcept
   {
     return *this;
   }
 
-  DummyAbortMessenger const &
+  DummyAssertMessenger const &
   operator<<(std::ios &(*)(std::ios &)) const noexcept
   {
     return *this;
   }
 
-  DummyAbortMessenger const &
+  DummyAssertMessenger const &
   operator<<(std::ios_base &(*)(std::ios_base &)) const noexcept
   {
     return *this;
@@ -110,11 +109,11 @@ public:
   {
     return 0;
   }
-}; // class DummyAbortMessenger
+}; // class DummyAssertMessenger
 
 } // namespace Enek::Detail
 
-# define ENEK_ASSERT(EXPR) true ? 0 : ::Enek::Detail::DummyAbortMessenger{}
+#define ENEK_ASSERT(EXPR) true ? 0 : ::Enek::Detail::DummyAssertMessenger{}
 
 #endif // defined(ENEK_ENABLE_ASSERT)
 

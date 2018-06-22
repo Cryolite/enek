@@ -14,46 +14,47 @@ extern "C" void __gcov_flush();
 
 namespace Enek::Detail{
 
-AbortMessenger::AbortMessenger(char const *function_name,
-                               char const *file_name,
-                               int line_number,
-                               char const *expression,
-                               boost::stacktrace::stacktrace &&st,
-                               char const *git_commit_hash)
+AssertMessenger::AssertMessenger(char const *function_name,
+                                 char const *file_name,
+                                 int line_number,
+                                 char const *expression,
+                                 boost::stacktrace::stacktrace &&stacktrace,
+                                 char const *git_commit_hash)
   : oss_(),
     function_name_(function_name),
     file_name_(file_name),
     line_number_(line_number),
     expression_(expression),
-    stacktrace_(std::move(st)),
+    stacktrace_(std::move(stacktrace)),
     git_commit_hash_(git_commit_hash)
 {}
 
-AbortMessenger &AbortMessenger::operator<<(std::ostream &(*pf)(std::ostream &))
+AssertMessenger &
+AssertMessenger::operator<<(std::ostream &(*pf)(std::ostream &))
 {
   oss_ << pf;
   return *this;
 }
 
-AbortMessenger &AbortMessenger::operator<<(std::ios &(*pf)(std::ios &))
+AssertMessenger &AssertMessenger::operator<<(std::ios &(*pf)(std::ios &))
 {
   oss_ << pf;
   return *this;
 }
 
-AbortMessenger &
-AbortMessenger::operator<<(std::ios_base &(*pf)(std::ios_base &))
+AssertMessenger &
+AssertMessenger::operator<<(std::ios_base &(*pf)(std::ios_base &))
 {
   oss_ << pf;
   return *this;
 }
 
-AbortMessenger::operator int() const noexcept
+AssertMessenger::operator int() const noexcept
 {
   return 0;
 }
 
-AbortMessenger::~AbortMessenger()
+[[noreturn]] AssertMessenger::~AssertMessenger()
 {
   std::cerr << file_name_ << ':' << line_number_ << ": " << function_name_
             << ": " << "Assertion `" << expression_ << "' failed.\n";
