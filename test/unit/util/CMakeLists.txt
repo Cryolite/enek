@@ -4,6 +4,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 add_executable(test_unit_util
+  abort.cpp
   assert.cpp
   throw.cpp)
 target_link_libraries(test_unit_util
