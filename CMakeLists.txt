@@ -63,9 +63,13 @@ message("ENEK_GIT_COMMIT_HASH=${ENEK_GIT_COMMIT_HASH}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(ENEK_ENABLE_ASSERT ON CACHE BOOL "Enable assertions.")
+  set(ENEK_ENABLE_ASSERT_PARANOID ON CACHE BOOL "Enable paranoid assertions.")
 endif()
 if (ENEK_ENABLE_ASSERT)
   add_definitions(-DENEK_ENABLE_ASSERT)
+endif()
+if (ENEK_ENABLE_ASSERT_PARANOID)
+  add_definitions(-DENEK_ENABLE_ASSERT_PARANOID)
 endif()
 message("ENEK_ENABLE_ASSERT=${ENEK_ENABLE_ASSERT}")
 
