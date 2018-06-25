@@ -36,7 +36,7 @@ include(ExternalProject)
 
 # `marisa-trie` assumes in-source build. Otherwise its build fails.
 ExternalProject_Add(marisa-trie-install
-  GIT_REPOSITORY git://github.com/s-yata/marisa-trie.git
+  GIT_REPOSITORY https://github.com/s-yata/marisa-trie.git
   CONFIGURE_COMMAND autoreconf -i && env "CFLAGS=${ENEK_EXT_MARISA_TRIE_CFLAGS}" "CXXFLAGS=${ENEK_EXT_MARISA_TRIE_CXXFLAGS}" "LDFLAGS=${ENEK_EXT_MARISA_TRIE_LDFLAGS}" ./configure --prefix=<INSTALL_DIR>
   BUILD_COMMAND type nproc && make -j $(nproc) || make
   BUILD_IN_SOURCE ON)

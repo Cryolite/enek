@@ -1,144 +1,55 @@
 #if !defined(ENEK_DICTIONARY_DICTIONARY_HPP_INCLUDE_GUARD)
 #define ENEK_DICTIONARY_DICTIONARY_HPP_INCLUDE_GUARD
 
+#include <enek/dictionary/word_descriptor.hpp>
+#include <enek/dictionary/fundamental.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_categories.hpp>
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
-#include <functional>
 #include <memory>
-#include <cstddef>
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
-#include <vector>
-#include <string>
 #include <type_traits>
 #include <cstdint>
-#include <limits>
 
 
-namespace Enek{
-
-typedef std::uint32_t WordIndex;
-
-constexpr WordIndex getInvalidWordIndex() noexcept
-{
-  return std::numeric_limits<WordIndex>::max();
-}
-
-constexpr WordIndex getMaxNumWordsInDictionary() noexcept
-{
-  using WordIndexDifference = std::make_signed_t<WordIndex>;
-  return std::numeric_limits<WordIndexDifference>::max();
-}
-
-#if defined(ENEK_ENABLE_ASSERT_PARANOID)
-
-class Dictionary;
-
-class WordDescriptor
-{
-private:
-  friend class Enek::Dictionary;
-
-  WordDescriptor() noexcept;
-
-  WordDescriptor(Enek::WordIndex index,
-                 std::shared_ptr<Enek::WordIndex> const &p) noexcept;
-
-private:
-  bool isWeakPointerEmpty_() const noexcept;
-
-  bool isSingular_() const noexcept;
-
-  bool isInvalidated_() const noexcept;
-
-  void assertComparableTo_(WordDescriptor const &rhs) const noexcept;
-
-public:
-  WordDescriptor(WordDescriptor const &rhs) noexcept;
-
-  WordDescriptor(WordDescriptor &&rhs) noexcept;
-
-  void swap(WordDescriptor &rhs) noexcept;
-
-  WordDescriptor &operator=(WordDescriptor const &rhs) noexcept;
-
-  WordDescriptor &operator=(WordDescriptor &&rhs) noexcept;
-
-public:
-  bool operator==(WordDescriptor const &rhs) const noexcept;
-
-  bool operator!=(WordDescriptor const &rhs) const noexcept;
-
-  bool operator<(WordDescriptor const &rhs) const noexcept;
-
-  bool operator>(WordDescriptor const &rhs) const noexcept;
-
-  bool operator<=(WordDescriptor const &rhs) const noexcept;
-
-  bool operator>=(WordDescriptor const &rhs) const noexcept;
-
-private:
-  friend class std::hash<Enek::WordDescriptor>;
-
-private:
-  Enek::WordIndex index_;
-  std::weak_ptr<Enek::WordIndex> p_;
-}; // class WordDescriptor
-
-void swap(WordDescriptor &lhs, WordDescriptor &rhs) noexcept;
-
-} // namespace Enek
-
-namespace std{
-
-template<>
-struct hash<Enek::WordDescriptor>
-{
-  std::size_t operator()(Enek::WordDescriptor const &k) const;
-}; // struct hash<Enek::WordDescriptor>
-
-} // namespace std
-
-namespace Enek{
-
-#else // defined(ENEK_ENABLE_ASSERT_PARANOID)
-
-typedef WordIndex WordDescriptor;
-
-#endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
+namespace Enek::Dictionary{
 
 class Dictionary
 {
 private:
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
-  static Enek::WordDescriptor getWordDescriptor_(
-    Enek::WordIndex index, std::shared_ptr<Enek::WordIndex> const &p) noexcept;
+  static Enek::Dictionary::WordDescriptor getWordDescriptor_(
+    Enek::Dictionary::WordIndex index,
+    std::shared_ptr<Enek::Dictionary::WordIndex> const &p) noexcept;
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
 
 public:
   class WordIterator
     : public boost::iterator_facade<
         WordIterator,
-        Enek::WordDescriptor,
+        Enek::Dictionary::WordDescriptor,
         boost::forward_traversal_tag,
-        Enek::WordDescriptor,
-        std::make_signed_t<Enek::WordIndex>>
+        Enek::Dictionary::WordDescriptor,
+        std::make_signed_t<Enek::Dictionary::WordIndex>>
   {
   private:
-    friend class Enek::Dictionary;
+    friend class Enek::Dictionary::Dictionary;
 
   private:
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
-    WordIterator(Enek::WordIndex index,
-                 std::shared_ptr<Enek::WordIndex> const &p) noexcept;
+    WordIterator(
+      Enek::Dictionary::WordIndex index,
+      std::shared_ptr<Enek::Dictionary::WordIndex> const &p) noexcept;
 #else // defined(ENEK_ENABLE_ASSERT_PARANOID)
-    explicit WordIterator(Enek::WordIndex index) noexcept;
+    explicit WordIterator(Enek::Dictionary::WordIndex index) noexcept;
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
 
   private:
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
+    bool isIndexSingular_() const noexcept;
+
     bool isWeakPointerEmpty_() const noexcept;
 
     bool isSingular_() const noexcept;
@@ -169,9 +80,9 @@ public:
     void increment() noexcept;
 
   private:
-    Enek::WordIndex index_;
+    Enek::Dictionary::WordIndex index_;
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
-    std::weak_ptr<Enek::WordIndex> p_;
+    std::weak_ptr<Enek::Dictionary::WordIndex> p_;
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
   }; // class WordIterator
 
@@ -179,10 +90,10 @@ public:
 
   static_assert(
     std::is_same_v<boost::iterator_value<WordIterator>::type,
-                   Enek::WordDescriptor>);
+                   Enek::Dictionary::WordDescriptor>);
   static_assert(
     std::is_same_v<boost::iterator_reference<WordIterator>::type,
-                   Enek::WordDescriptor>);
+                   Enek::Dictionary::WordDescriptor>);
   static_assert(
     std::is_same_v<boost::iterator_difference<WordIterator>::type,
                    std::int32_t>);
@@ -208,17 +119,17 @@ public:
 
   WordIteratorRange iterateWords() const noexcept;
 
-  Enek::WordIndex getNumWords() const noexcept;
+  Enek::Dictionary::WordIndex getNumWords() const noexcept;
 
-  Enek::WordIndex getWordIndex(Enek::WordDescriptor const &w) const noexcept;
+  Enek::Dictionary::WordIndex
+  getWordIndex(Enek::Dictionary::WordDescriptor const &w) const noexcept;
 
 private:
-  std::vector<std::vector<std::string>> words_;
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
-  std::shared_ptr<Enek::WordIndex> p_;
+  std::shared_ptr<Enek::Dictionary::WordIndex> p_;
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
 }; // class Dictionary
 
-} // namespace Enek
+} // namespace Enek::Dictionary
 
 #endif // !defined(ENEK_DICTIONARY_DICTIONARY_HPP_INCLUDE_GUARD)
