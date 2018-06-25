@@ -1,14 +1,18 @@
 FROM cryolite/gcc:latest
 
+# `autoconf`, `automake`, and `libtool` is required to build marisa-trie.
 RUN set -ex; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
+    autoconf \
+    automake \
     bzip2 \
     ca-certificates \
     curl \
     dirmngr \
     git \
     libbz2-dev \
+    libtool \
     make \
     pgp \
     python3 \
