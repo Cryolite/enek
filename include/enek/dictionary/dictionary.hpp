@@ -2,15 +2,17 @@
 #define ENEK_DICTIONARY_DICTIONARY_HPP_INCLUDE_GUARD
 
 #include <enek/dictionary/word_descriptor.hpp>
+#include <enek/dictionary/attribute_descriptor.hpp>
 #include <enek/dictionary/fundamental.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_categories.hpp>
-#if defined(ENEK_ENABLE_ASSERT_PARANOID)
-#include <memory>
-#endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
+#include <vector>
+#include <string_view>
+#include <string>
 #include <type_traits>
+#include <memory>
 #include <cstdint>
 
 
@@ -19,11 +21,8 @@ namespace Enek::Dictionary{
 class Dictionary
 {
 private:
-#if defined(ENEK_ENABLE_ASSERT_PARANOID)
-  static Enek::Dictionary::WordDescriptor getWordDescriptor_(
-    Enek::Dictionary::WordIndex index,
-    std::shared_ptr<Enek::Dictionary::WordIndex> const &p) noexcept;
-#endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
+  Enek::Dictionary::WordDescriptor
+  getWordDescriptor(Enek::Dictionary::WordIndex index) const noexcept;
 
 public:
   class WordIterator
@@ -41,20 +40,10 @@ public:
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
     WordIterator(
       Enek::Dictionary::WordIndex index,
-      std::shared_ptr<Enek::Dictionary::WordIndex> const &p) noexcept;
+      Dictionary const *p_dictionary,
+      std::shared_ptr<Enek::Dictionary::WordIndex const> const &p_size) noexcept;
 #else // defined(ENEK_ENABLE_ASSERT_PARANOID)
-    explicit WordIterator(Enek::Dictionary::WordIndex index) noexcept;
-#endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
-
-  private:
-#if defined(ENEK_ENABLE_ASSERT_PARANOID)
-    bool isIndexSingular_() const noexcept;
-
-    bool isWeakPointerEmpty_() const noexcept;
-
-    bool isSingular_() const noexcept;
-
-    bool isInvalidated_() const noexcept;
+    explicit WordIterator(WordIndex index) noexcept;
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
 
   public:
@@ -71,6 +60,22 @@ public:
     WordIterator &operator=(WordIterator &&rhs) noexcept;
 
   private:
+#if defined(ENEK_ENABLE_ASSERT_PARANOID)
+    bool isIndexSingular_() const noexcept;
+
+    bool isDictionaryPointerNull_() const noexcept;
+
+    bool isSizePointerEmpty_() const noexcept;
+#endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
+
+  private:
+#if defined(ENEK_ENABLE_ASSERT_PARANOID)
+    bool isSingular() const noexcept;
+
+    bool isInvalidated() const noexcept;
+#endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
+
+  private:
     friend class boost::iterator_core_access;
 
     reference dereference() const noexcept;
@@ -80,9 +85,10 @@ public:
     void increment() noexcept;
 
   private:
-    Enek::Dictionary::WordIndex index_;
+    WordIndex index_;
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
-    std::weak_ptr<Enek::Dictionary::WordIndex> p_;
+    Dictionary const *p_dictionary_;
+    std::weak_ptr<WordIndex const> p_size_;
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
   }; // class WordIterator
 
@@ -105,7 +111,7 @@ public:
                            boost::bidirectional_traversal_tag>);
 
 public:
-  Dictionary();
+  Dictionary() noexcept;
 
   Dictionary(Dictionary const &) = delete;
 
@@ -121,14 +127,31 @@ public:
 
   Enek::Dictionary::WordIndex getNumWords() const noexcept;
 
-  Enek::Dictionary::WordIndex
-  getWordIndex(Enek::Dictionary::WordDescriptor const &w) const noexcept;
+  Enek::Dictionary::WordIndex getWordIndex(
+    Enek::Dictionary::WordDescriptor const &w) const noexcept;
+
+  Enek::Dictionary::ColumnIndex getNumWordColumns(
+    Enek::Dictionary::WordDescriptor const &w) const noexcept;
+
+  Enek::Dictionary::AttributeDescriptor getWordAttribute(
+    Enek::Dictionary::WordDescriptor const &w,
+    Enek::Dictionary::ColumnIndex column_index) const noexcept;
+
+  std::string_view getWordAttributeStringView(
+    Enek::Dictionary::WordDescriptor const &w,
+    Enek::Dictionary::ColumnIndex column_index) const noexcept;
+
+  Enek::Dictionary::WordDescriptor
+  addWord(std::vector<std::string> &&attribute_strings);
 
 private:
+  std::shared_ptr<void> p_impl_;
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
-  std::shared_ptr<Enek::Dictionary::WordIndex> p_;
+  std::shared_ptr<Enek::Dictionary::WordIndex const> p_size_;
 #endif // defined(ENEK_ENABLE_ASSERT_PARANOID)
 }; // class Dictionary
+
+void swap(Dictionary::WordIterator &lhs, Dictionary::WordIterator &rhs) noexcept;
 
 } // namespace Enek::Dictionary
 

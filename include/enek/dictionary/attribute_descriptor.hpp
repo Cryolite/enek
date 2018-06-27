@@ -13,16 +13,12 @@ namespace Enek::Dictionary{
 
 #if defined(ENEK_ENABLE_ASSERT_PARANOID)
 
-namespace Detail{
-
-class AttributeSetImpl;
-
-} // namespace Detail
+class AttributeSet;
 
 class AttributeDescriptor
 {
 private:
-  friend class Enek::Dictionary::Detail::AttributeSetImpl;
+  friend class Enek::Dictionary::AttributeSet;
 
   AttributeDescriptor() noexcept;
 
@@ -72,7 +68,7 @@ public:
   bool operator>=(AttributeDescriptor const &rhs) const noexcept;
 
 private:
-  friend class std::hash<Enek::Dictionary::AttributeDescriptor>;
+  friend class std::hash<AttributeDescriptor>;
 
 private:
   Enek::Dictionary::AttributeIndex index_;

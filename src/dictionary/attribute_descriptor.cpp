@@ -103,8 +103,8 @@ bool AttributeDescriptor::isInvalidated() const noexcept
 std::shared_ptr<void const>
 AttributeDescriptor::getValidationPointer() const noexcept
 {
-  if (auto validation_pointer = validation_pointer_.lock()) {
-    return validation_pointer;
+  if (auto p = validation_pointer_.lock()) {
+    return p;
   }
   if (this->isSingular()) {
     ENEK_ABORT << "Attempt to get the validation pointer of a singular "

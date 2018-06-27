@@ -24,18 +24,7 @@ private:
 
   WordDescriptor(
     Enek::Dictionary::WordIndex index,
-    std::shared_ptr<Enek::Dictionary::WordIndex> const &p) noexcept;
-
-private:
-  bool isIndexSingular_() const noexcept;
-
-  bool isWeakPointerEmpty_() const noexcept;
-
-  bool isSingular_() const noexcept;
-
-  bool isInvalidated_() const noexcept;
-
-  void assertComparableTo_(WordDescriptor const &rhs) const noexcept;
+    std::shared_ptr<void const> const &validation_pointer) noexcept;
 
 public:
   WordDescriptor(WordDescriptor const &rhs) noexcept;
@@ -47,6 +36,23 @@ public:
   WordDescriptor &operator=(WordDescriptor const &rhs) noexcept;
 
   WordDescriptor &operator=(WordDescriptor &&rhs) noexcept;
+
+private:
+  bool isIndexSingular_() const noexcept;
+
+  bool isValidationPointerEmpty_() const noexcept;
+
+private:
+  bool isSingular() const noexcept;
+
+  bool isInvalidated() const noexcept;
+
+  std::shared_ptr<void const> getValidationPointer() const noexcept;
+
+  Enek::Dictionary::WordIndex getIndex() const noexcept;
+
+private:
+  void assertComparableTo_(WordDescriptor const &rhs) const noexcept;
 
 public:
   bool operator==(WordDescriptor const &rhs) const noexcept;
@@ -66,7 +72,7 @@ private:
 
 private:
   Enek::Dictionary::WordIndex index_;
-  std::weak_ptr<Enek::Dictionary::WordIndex> p_;
+  std::weak_ptr<void const> validation_pointer_;
 }; // class WordDescriptor
 
 void swap(WordDescriptor &lhs, WordDescriptor &rhs) noexcept;
